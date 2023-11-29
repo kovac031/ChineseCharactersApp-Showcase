@@ -48,31 +48,50 @@ Following common naming convention for vocabulary recognition games, I will have
 
 > \* however I made the vocabulary list table first and called it MainTable and will keep it as such for the time being.
 
-### Issue #1 
-- the user will score how easy a character is to remember -BUT- multiple decks may contain the same character - how do I handle duplicates and scoring, and how do I set up the relationship between the cards and decks tables?
+```SQL
+CREATE TABLE MainTable (
+RowId uniqueidentifier not null PRIMARY KEY,
+Simplified nvarchar(255) null,
+Traditional nvarchar(255) null,
+Pinyin nvarchar(255) null,
+Translation nvarchar(255) null,
+Note nvarchar(max) null,
+TimeAdded datetime not null,
+TimeUpdated datetime null,
+AuthorId uniqueidentifier null, -- the user
+DifficultyRating int null,
+RatingMultiplier int null,
+PracticeCount int null);
 
-> it seems intuitive for each user to only have one (for example) 是 in their list, even if the character may have multiple meanings and/or pronunciations - as the app tests recognition, not the depth of knowledge about each character
+CREATE TABLE UserTable (
+UserId uniqueidentifier not null PRIMARY KEY,
+Username varchar(25) not null,
+Password varchar(25) not null,
+RegisteredOn datetime not null,
+LastUpdated datetime null);
 
-* 1 user <-> m cards // 1-m
+CREATE TABLE DeckTable (
+DeckId uniqueidentifier not null,
+CardId uniqueidentifier not null, -- the card in the deck
+UserId uniqueidentifier not null, -- the user
+DeckName nvarchar(255) null,
+TextbookName nvarchar (255) null,
+LessonUnit nvarchar(255) null,
+TimeAdded datetime null,
+TimeUpdated datetime null,
+PRIMARY KEY (DeckId, CardId)); -- because DeckId will repeat for each deck and cannot be PK on its own
+```
+There are no unique cards or decks, each user get copies with new IDs to allow for editing and personalization.
 
-> \* I cannot have unique cards used by multiple users (1-m), because the users need to have editing control over their vocabulary, which is also what an evolving character difficulty score/rating practically is 
+Each user may have more than one owned deck, indicating a 1-m relationship. Each user also will have a multitude of owned cards in the MainTable, also 1-m. And finally, each deck may hold a multitude of cards AND each card may be found in multiple decks, meaning a many-to-many relationship. 
 
-...
+This way, there is only one instance of a user owned character and card used for scoring purposes, while multiple instances of that CardId may appear in the DeckTable, each tied to a separate specific DeckId, making a kind of ternary relationship in the DeckTable.
 
-> the user may organize their cards into different decks
+[image](link)
 
-* 1 user <-> m decks // 1-m
+## Saving lists to database
+> via uploading Excel files and from copying from a public pool
 
-...
-
-> the above means that the same character may be found in different decks, -AND- may have different meanings and/or pronunciations there, making them essentialy new cards of the same character - therefore, there both needs to be duplicates of characters for the purpose of storing decks -AND- NOT be duplicates in the users' overall list (but this is a point of consideration for code, not table structure)
-
-* 1 card <-> m decks // 1-m
-
-> \* I cannot have unique decks because a deck here is not handled as a unique entity (such as a card or a user), but is rather a label for a card-deck combo
-
-...
-
-### My solution:
+## Practice & Scoring
 
 
