@@ -39,7 +39,7 @@ Link to live website: https://practice-chinese.azurewebsites.net
 
 > learning how to use GitHub Actions to deploy and update the app hosted on Azure directly from GH repo
 
-> using BackgroundWorker to periodically wake up the database on Azure, because the free tier automatically pauses it every hour
+> using BackgroundWorker to periodically wake up the free tier database on Azure, because the free tier automatically pauses it every hour
 
 ## Database planning
 > How do I set up my database tables to respect the requirements outlined in the specification?
