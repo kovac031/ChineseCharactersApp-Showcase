@@ -87,10 +87,66 @@ Each user may have more than one owned deck, indicating a 1-m relationship. Each
 
 This way, there is only one instance of a user owned character and card used for scoring purposes, while multiple instances of that CardId may appear in the DeckTable, each tied to a separate specific DeckId, making a kind of ternary relationship in the DeckTable.
 
-[image](link)
+[image of the dekctable](link)
 
 ## Saving lists to database
-> via uploading Excel files and from copying from a public pool
+> via uploading Excel files using ClosedXML
+```C#
+UploadExcelFile( excel object )
+{
+	... // maps the file to object and passes it
+}
+SaveToDatabase( excel object )
+{
+	... // receives the object, adds relevant params and sends it to the database layer
+}
+```
+> via adding from existing lists, a public pool
+```C#
+ShowPresetDeckPage( params )
+{
+	...
+	GetAllCards_MyCardsOnly(id)
+	GetAllDecks_MyDecksOnly(id)
+  ...
+	// a DECKMASTER user is set to serve as a public pool repository of word lists
+	// filters the list based on user input and passes it
+}
+AddPresetDeck( params )
+{
+	... // receives the list, maps it to necessary object and sends to database layer
+}
+```
+> Database layer receives object and params from either controller source:
+```C#
+SaveToDatabase ( uploaded object with params )
+{
+	...
+	GetAllCards_MyCardsOnly(id) //fetches all cards of the user
+	FindDuplicates(all cards, uploaded object) //looks for and returns duplicates
+	SaveToMainTable( various ) //saves added cards to MainTable
+	SaveToDeckTable( various ) //saves added cards to DeckTable
+  ...
+}
+```
+Currently, difficulty rating is done on a single card (unique RowId) but the user sees this as a character (Simplified or Traditional), which means checks for duplicates is done on Simpified and Traditional columns and not RowId.
+```C#
+IEnumerable<CardDTO> duplicates = allCards.Where(x =>
+    newCards.Any(y =>
+        !string.IsNullOrEmpty(y.Simplified) && x.Simplified == y.Simplified
+        ||
+        !string.IsNullOrEmpty(y.Traditional) && x.Traditional == y.Traditional
+    ) // allows for either Simplified or Traditional column to be empty/null and not count empty/null as duplicates
+);
+return duplicates.ToList();
+```
+> SaveToMainTable() will skip adding new cards (for that row) from new list if a match is found in the Simplified or Traditional columns
+
+> SaveToDeckTable() must add all cards so that the entirety of the deck is added, but instead of generating a new CardId for a duplicate card (based on matches on Simplified/Traditional) it will use the existing RowId for the CardId - connecting an existing card/character to a new deck
+
+> because DECKMASTER is a public pool, a check is implemented to not skip duplicates if DECKMASTER is the uploader, to make sure list-specific pinyin and translations are retained for that character
+
+> \* one planned feature is to remove skipping duplicates, but allow users to select which field content to accept if a new deck happens to have an already added character but with a different pinyin or translation
 
 ## Practice & Scoring
 
