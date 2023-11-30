@@ -163,7 +163,7 @@ GoToPracticeButton( params )
 	GetAllDecks_MyDecksOnly(userId)
 	// serializes allDecks to session
 	// populates dropdown for deck selection and sets ViewBags
-	ClearSessionData() // clears old session data in case the user did not complete the routine
+	ClearSessionData() // better to clear session data at the start than at the end, in case the user did not complete the routine
 }
 ```
 Loading the list only once per session based on selected parameters in the previous step
@@ -245,7 +245,7 @@ public async Task UpdateDifficultyRatingFromButtonValue(int index, int buttonVal
         _buttonValue = JsonConvert.DeserializeObject<int[]>(buttonValueJson);
     }
 
-    _buttonValue[index] = buttonValue;
+    _buttonValue[index] = buttonValue; // a button is pressed and its value is stored here to the array
                 
     byte[] setButtonValue = System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_buttonValue));
     HttpContext.Session.Set("ButtonValue", setButtonValue); // updates array
@@ -254,7 +254,7 @@ public async Task UpdateDifficultyRatingFromButtonValue(int index, int buttonVal
     {
         _cardList = JsonConvert.DeserializeObject<List<CardDTO>>(HttpContext.Session.GetString("SelectedCharacters"));
                         
-        for (index = 0; index < howMany; index++)
+        for (index = 0; index < howMany; index++) // updates the difficulty score of each shown card by using the stored button array values
         {                    
             _cardList[index].PracticeCount = _cardList[index].PracticeCount + 1; // counts how many times a card was practiced
 
