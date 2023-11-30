@@ -210,15 +210,56 @@ ShowOneByOneDuringPractice( params )
 }
 ```
 ### Buttons as user input for scoring logic
+Must store button press values into array to be connected with the relevant card shown, to be saved to database at the end collectively.
+> a JavaScript function in the View/page handles an AJAX request, triggering the method below
 
 ```C#
-```
+public async Task UpdateDifficultyRatingFromButtonValue(int index, int buttonValue)
+{
+    int howMany = HttpContext.Session.GetInt32("HowMany") ?? 0;
 
-```C#
-```
+    // -------------------- "is there an array"-check block
+    bool isArrayInitialized;
+    byte[] isArrayInitializedBytes;
+    if (HttpContext.Session.TryGetValue("IsArrayInitialized", out isArrayInitializedBytes))
+    {
+        isArrayInitialized = BitConverter.ToBoolean(isArrayInitializedBytes, 0);
+    }
+    else
+    {
+        isArrayInitialized = false;
+    }
+    // -----------------------
 
-```C#
-```
+    if (!isArrayInitialized)
+    {                
+        _buttonValue = new int[howMany]; // new array for storing button values
 
-```C#
+        byte[] isArrayInitializedBytesFlag = BitConverter.GetBytes(true);
+        HttpContext.Session.Set("IsArrayInitialized", isArrayInitializedBytesFlag); // new flag
+    }
+    else
+    {                
+        byte[] getButtonValue = HttpContext.Session.Get("ButtonValue"); // fetch existing array, needed because cards are shown indexed one by one
+        string buttonValueJson = System.Text.Encoding.UTF8.GetString(getButtonValue);
+        _buttonValue = JsonConvert.DeserializeObject<int[]>(buttonValueJson);
+    }
+
+    _buttonValue[index] = buttonValue;
+                
+    byte[] setButtonValue = System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(_buttonValue));
+    HttpContext.Session.Set("ButtonValue", setButtonValue); // updates array
+
+    if (index == (howMany - 1)) 
+    {
+        _cardList = JsonConvert.DeserializeObject<List<CardDTO>>(HttpContext.Session.GetString("SelectedCharacters"));
+                        
+        for (index = 0; index < howMany; index++)
+        {                    
+            _cardList[index].PracticeCount = _cardList[index].PracticeCount + 1; // counts how many times a card was practiced
+
+            await _cards.UpdateOneCard(_cardList[index], _cardList[index].RowId, _buttonValue[index]);
+        }          
+    }
+}
 ```
