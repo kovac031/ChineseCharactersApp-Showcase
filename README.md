@@ -32,7 +32,7 @@ Link to live website: https://practice-chinese.azurewebsites.net
 
 # Challenges & Learning points
 
-## Minor points
+## Minor learning points
 > finding a solution how to achieve upload excel file functionality --> ClosedXML
 
 > learning how to use Microsoft Azure to create and manage SQL Server database and Web App
@@ -149,5 +149,76 @@ return duplicates.ToList();
 > \* one planned feature is to remove skipping duplicates, but allow users to select which field content to accept if a new deck happens to have an already added character but with a different pinyin or translation
 
 ## Practice & Scoring
+> list should load on start of session and saved on end, to minimize database calls
 
+> serializing objects to HttpContext.Session strings to pass them between methods
 
+### Displaying cards one by one for the user
+Separate method to handle initial setup, the View/page allows for user input of parameters, has dropdown menu
+```C#
+GoToPracticeButton( params )
+{
+	...
+	// finds userId from System.Security.Claims
+	GetAllDecks_MyDecksOnly(userId)
+	// serializes allDecks to session
+	// populates dropdown for deck selection and sets ViewBags
+	ClearSessionData() // clears old session data in case the user did not complete the routine
+}
+```
+Loading the list only once per session based on selected parameters in the previous step
+```C#
+ShowOneByOneDuringPractice( params )
+{
+	// part 1
+	...
+	// fetches list if found in session
+	// else
+	InitializeList( params )
+	...
+}
+```
+```C#
+InitializeList( params )
+{
+	...
+	// finds userId from System.Security.Claims
+	GetSomeCharactersForUserAsync( params ) // database layer method, params will specify which characters are returned
+	// serializes params
+	// serializes list of returned cards
+	// redirects back to ShowOneByOneDuringPractice( params )
+	...
+}
+```
+The returned list entries are indexed and showed one by one for memory recognition practice
+```C#
+ShowOneByOneDuringPractice( params )
+{
+	// part 2
+	// deserializes relevant params
+	if (index >= 0 && index < _cardList.Count)
+	{
+    		ViewBag.CurrentIndex = index;
+   		ViewBag.NextIndex = index + 1;
+    		ViewBag.HowMany = howMany;
+
+    		ViewBag.ShowHide = displayParams;
+
+    		return View("ShowOneByOneDuringPractice", _cardList[index]);
+	}
+	...
+}
+```
+### Buttons as user input for scoring logic
+
+```C#
+```
+
+```C#
+```
+
+```C#
+```
+
+```C#
+```
