@@ -10,6 +10,8 @@ Link to live website: https://practice-chinese.azurewebsites.net
 - Microsoft Azure SQL Server / SQL Database / App Services (Web App)
 - ClosedXML, Microsoft.Data.SqlClient
 
+> Feature demo:
+
 ![gif demo](https://github.com/kovac031/ChineseCharactersApp-Showcase/blob/main/demo.gif)
 
 ## Main Features to implement for first version public release
