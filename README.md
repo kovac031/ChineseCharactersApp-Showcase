@@ -10,6 +10,8 @@ Link to live website: https://practice-chinese.azurewebsites.net
 - Microsoft Azure SQL Server / SQL Database / App Services (Web App)
 - ClosedXML, Microsoft.Data.SqlClient
 
+![gif demo](https://github.com/kovac031/ChineseCharactersApp-Showcase/blob/main/demo.gif)
+
 ## Main Features to implement for first version public release
 > specification
 
@@ -87,7 +89,7 @@ Each user may have more than one owned deck, indicating a 1-m relationship. Each
 
 This way, there is only one instance of a user owned character and card used for scoring purposes, while multiple instances of that CardId may appear in the DeckTable, each tied to a separate specific DeckId, making a kind of ternary relationship in the DeckTable.
 
-[image of the dekctable](link)
+![image of DeckTable](https://github.com/kovac031/ChineseCharactersApp-Showcase/blob/main/decktable.png)
 
 ## Saving lists to database
 > via uploading Excel files using ClosedXML
