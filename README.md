@@ -30,9 +30,9 @@ Link to live website: https://practice-chinese.azurewebsites.net
   - a "spaced repetition" logic for weighted random selection of which characters to display
   - buttons for users to give input on the ease/difficulty of recognizing each displayed character
   - allow editing displayed characters "on the fly"
-  - allow users to freely change their username and password
-  - track and display the easiest and hardest charcters to recognize for that user
-  - overview of the user's saved vocabulary
+- allow users to freely change their username and password
+- track and display the easiest and hardest charcters to recognize for that user
+- overview of the user's saved vocabulary
 
 # Challenges & Learning points
 
