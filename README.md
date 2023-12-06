@@ -134,6 +134,8 @@ SaveToDatabase ( uploaded object with params )
 }
 ```
 Currently, difficulty rating is done on a single card (unique RowId) but the user sees this as a character (Simplified or Traditional), which means checks for duplicates is done on Simpified and Traditional columns and not RowId.
+
+Originally, this was my solution:
 ```C#
 IEnumerable<CardDTO> duplicates = allCards.Where(x =>
     newCards.Any(y =>
@@ -143,6 +145,20 @@ IEnumerable<CardDTO> duplicates = allCards.Where(x =>
     ) // allows for either Simplified or Traditional column to be empty/null and not count empty/null as duplicates
 );
 return duplicates.ToList();
+```
+But I have since discovered a niche case where different traditional characters may have been simplified into an identical simplified character, when technically they should not be the same one:
+```C#
+IEnumerable<CardDTO> duplicates = allCards.Where(old =>
+    newCards.Any(nov =>
+        !string.IsNullOrEmpty(nov.Simplified) && old.Simplified == nov.Simplified &&
+        (
+            (string.IsNullOrEmpty(nov.Traditional) && string.IsNullOrEmpty(old.Traditional)) ||
+            (!string.IsNullOrEmpty(nov.Traditional) && nov.Traditional == old.Traditional)
+        ) // 干 is simplifed from both 幹 and 乾 and this avoids mixing them up
+        ||
+        !string.IsNullOrEmpty(nov.Traditional) && old.Traditional == nov.Traditional
+     ) 
+);
 ```
 > SaveToMainTable() will skip adding new cards (for that row) from new list if a match is found in the Simplified or Traditional columns
 
