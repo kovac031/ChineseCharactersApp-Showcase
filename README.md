@@ -147,18 +147,31 @@ IEnumerable<CardDTO> duplicates = allCards.Where(x =>
 return duplicates.ToList();
 ```
 But I have since discovered a niche case where different traditional characters may have been simplified into an identical simplified character, when technically they should not be the same one:
+> 干 is simplifed from both 幹 and 乾 and this avoids mixing them up
 ```C#
 IEnumerable<CardDTO> duplicates = allCards.Where(old =>
-    newCards.Any(nov =>
-        !string.IsNullOrEmpty(nov.Simplified) && old.Simplified == nov.Simplified &&
-        (
-            (string.IsNullOrEmpty(nov.Traditional) && string.IsNullOrEmpty(old.Traditional)) ||
-            (!string.IsNullOrEmpty(nov.Traditional) && nov.Traditional == old.Traditional)
-        ) // 干 is simplifed from both 幹 and 乾 and this avoids mixing them up
-        ||
-        !string.IsNullOrEmpty(nov.Traditional) && old.Traditional == nov.Traditional
-     ) 
-);
+                newCards.Any(nov =>
+                    ( //all three not null/empty and match check
+                        !string.IsNullOrEmpty(nov.Simplified) && !string.IsNullOrEmpty(old.Simplified) && old.Simplified.Trim() == nov.Simplified.Trim()
+                        &&
+                        !string.IsNullOrEmpty(nov.Traditional) && !string.IsNullOrEmpty(old.Traditional) && old.Traditional.Trim() == nov.Traditional.Trim()
+                        &&
+                        !string.IsNullOrEmpty(nov.Pinyin) && !string.IsNullOrEmpty(old.Pinyin) && old.Pinyin.Trim().ToLower() == nov.Pinyin.Trim().ToLower()
+                    )
+                    || // OR simplified is different or null/empty, so only check pinyin and traditional for matches
+                    (
+                        !string.IsNullOrEmpty(nov.Traditional) && !string.IsNullOrEmpty(old.Traditional) && old.Traditional.Trim() == nov.Traditional.Trim()
+                        &&
+                                !string.IsNullOrEmpty(nov.Pinyin) && !string.IsNullOrEmpty(old.Pinyin) && old.Pinyin.Trim().ToLower() == nov.Pinyin.Trim().ToLower()
+                    )
+                    || // OR traditional is different or null/empty, so only check pinyin and simplified for matches
+                    (
+                        !string.IsNullOrEmpty(nov.Simplified) && !string.IsNullOrEmpty(old.Simplified) && old.Simplified.Trim() == nov.Simplified.Trim()
+                        &&
+                        !string.IsNullOrEmpty(nov.Pinyin) && !string.IsNullOrEmpty(old.Pinyin) && old.Pinyin.Trim().ToLower() == nov.Pinyin.Trim().ToLower()
+                    )
+                ) // it is NOT possible to make matches if one side has simplified but no trad, and another has traditional but no simp, even if pinyin is identical ... because of how Chinese works
+            );
 ```
 > SaveToMainTable() will skip adding new cards (for that row) from new list if a match is found in the Simplified or Traditional columns
 
