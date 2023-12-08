@@ -156,19 +156,19 @@ IEnumerable<CardDTO> duplicates = allCards.Where(old =>
                         &&
                         !string.IsNullOrEmpty(nov.Traditional) && !string.IsNullOrEmpty(old.Traditional) && old.Traditional.Trim() == nov.Traditional.Trim()
                         &&
-                        !string.IsNullOrEmpty(nov.Pinyin) && !string.IsNullOrEmpty(old.Pinyin) && old.Pinyin.Trim().ToLower() == nov.Pinyin.Trim().ToLower()
+                        !string.IsNullOrEmpty(nov.Pinyin) && !string.IsNullOrEmpty(old.Pinyin) && old.Pinyin.Replace(" ", "").ToLower() == nov.Pinyin.Replace(" ", "").ToLower()
                     )
                     || // OR simplified is different or null/empty, so only check pinyin and traditional for matches
                     (
                         !string.IsNullOrEmpty(nov.Traditional) && !string.IsNullOrEmpty(old.Traditional) && old.Traditional.Trim() == nov.Traditional.Trim()
                         &&
-                                !string.IsNullOrEmpty(nov.Pinyin) && !string.IsNullOrEmpty(old.Pinyin) && old.Pinyin.Trim().ToLower() == nov.Pinyin.Trim().ToLower()
+                        !string.IsNullOrEmpty(nov.Pinyin) && !string.IsNullOrEmpty(old.Pinyin) && old.Pinyin.Replace(" ", "").ToLower() == nov.Pinyin.Replace(" ", "").ToLower()
                     )
                     || // OR traditional is different or null/empty, so only check pinyin and simplified for matches
                     (
                         !string.IsNullOrEmpty(nov.Simplified) && !string.IsNullOrEmpty(old.Simplified) && old.Simplified.Trim() == nov.Simplified.Trim()
                         &&
-                        !string.IsNullOrEmpty(nov.Pinyin) && !string.IsNullOrEmpty(old.Pinyin) && old.Pinyin.Trim().ToLower() == nov.Pinyin.Trim().ToLower()
+                        !string.IsNullOrEmpty(nov.Pinyin) && !string.IsNullOrEmpty(old.Pinyin) && old.Pinyin.Replace(" ", "").ToLower() == nov.Pinyin.Replace(" ", "").ToLower()
                     )
                 ) // it is NOT possible to make matches if one side has simplified but no trad, and another has traditional but no simp, even if pinyin is identical ... because of how Chinese works
             );
