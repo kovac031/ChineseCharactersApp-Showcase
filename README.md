@@ -1,4 +1,6 @@
 # ChineseCharactersApp - Showcase repo
+> the app is currently being restructured and updated due to me learning how to do things better; the information shown below may not be entirely accurate (is outdated)
+
 
 Link to live website: https://practice-chinese.azurewebsites.net
 > MVC app for practicing recognition of chinese characters, for language learners of Chinese
