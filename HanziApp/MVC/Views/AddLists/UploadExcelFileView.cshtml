@@ -1,0 +1,110 @@
+﻿<!-- UploadExcelFileView -->
+REDACTED FBI KGB CIA
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+
+    .main-div {
+        display: flex;
+        flex-direction: row;
+    }
+
+        .sub-div-left {
+            width: 45%;
+            padding-right: 50px;
+        }
+
+        .sub-div-right {
+            width: 55%;
+            padding-left: 50px;
+        }
+
+    .each {
+        display: flex;
+        flex-direction: column;
+        font-size: 20px;
+        padding-bottom: 15px;
+    }
+
+</style>
+
+
+<div class="main-div">
+
+    <div class="sub-div-left">
+
+        <h1>Upload Excel File</h1>
+        <p> All fields are optional. </p>
+
+        <form enctype="multipart/form-data" method="post" action="/AddLists/UploadExcelFile">
+            <div class="each">
+                <label asp-for="Deck.DeckName">Give a name to your deck/list if you want:</label>
+                <input asp-for="Deck.DeckName" />
+            </div>
+            <div class="each">
+                <label asp-for="Deck.BookName">Textbook title:</label>
+                <input asp-for="Deck.BookName" />
+            </div>
+            <div class="each">
+                <label asp-for="Deck.UnitName">Lesson unit of this textbook:</label>
+                <input asp-for="Deck.UnitName" />
+            </div>
+            <div class="each">
+                <input type="file" name="ExcelFile" />
+                <button onclick="startProgressTracking()" type="submit">Upload</button>
+            </div>
+        </form>              
+
+        @if (TempData["FailureMessage"] != null)
+        {
+            <div class="alert alert-danger">
+                @TempData["FailureMessage"]
+            </div>
+        }
+
+    </div>
+
+    <div class="sub-div-right">
+
+        <h3>Excel sheet example</h3>
+        <p style="font-size: 12px;">* You can ommit "Simplified"/"Traditional" columns depending on which you are not using. "Note" column is also optional.</p>
+
+        <img style="width: 100%;" src="~/images/excel-table-example.png" />
+    </div>
+
+</div>
+
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<div style="padding-top: 15px; padding-bottom: 15px;" id="partialViewUploadProgress"></div>
+
+
+
+
+@section Scripts
+    {
+    <script>
+
+        function updatePartial() {
+
+            $.get('@Url.Action("GetProgressData", "AddLists")', function (data) {
+                if (data) {
+                    $('#partialViewUploadProgress').html(data);
+                } 
+            });
+        }
+
+        function startProgressTracking() {
+
+            setInterval(updatePartial, 500);
+        }
+        
+    </script>
+}

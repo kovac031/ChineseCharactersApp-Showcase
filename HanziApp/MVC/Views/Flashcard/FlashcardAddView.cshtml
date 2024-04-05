@@ -1,0 +1,114 @@
+﻿<!-- FlashcardAddView -->
+REDACTED FBI KGB CIA
+
+<style>
+
+    .mycontainer {
+        padding: 25px;
+    }
+
+    .main-div {
+        display: flex;
+        flex-direction: row;
+    }
+
+        .sub-div-left {
+            width: 50%;
+            padding-right: 25px;
+        }
+
+        .sub-div-right {
+            width: 50%;
+            padding-left: 25px;
+        }
+
+    .buttons {
+        background-color: #f2f2f2;
+        color: #333;
+        padding: 4px 8px;
+        font-size: 18px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+        .buttons:hover {
+            background-color: #dcdcdc;
+            color: #333; /* New background color on hover */
+        }
+</style>
+
+<div>
+    <a class="buttons" href="@Url.Action("FlashcardsOverviewTable", "Flashcard")">Back to flashcards overview</a>
+</div>
+
+<div class="mycontainer">
+
+    <h4>You can add new vocabulary here</h4>
+    <br />
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["FailureMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["FailureMessage"]
+        </div>
+    }
+
+    <form asp-action="AddNewCard" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="main-div">
+                <div class="sub-div-left">
+                <div style="padding-bottom: 15px;" class="form-group">
+                    <label class="control-label">Simplified:</label>
+                    <input asp-for="Simplified" class="form-control" style="font-family: KaiTi; font-size: 50px;" />
+                </div>
+                </div>
+                <div class="sub-div-right">
+                <div style="padding-bottom: 15px;" class="form-group">
+                    <label class="control-label">Traditional:</label>
+                    <input asp-for="Traditional" class="form-control" style="font-family: KaiTi; font-size: 50px;" />
+                </div>
+                </div>
+            </div>        
+        
+        <div style="padding-bottom: 15px;" class="form-group">
+            <label class="control-label">Pinyin:</label>
+            <input asp-for="Pinyin" class="form-control" style="font-size: 30px;" />
+        </div>
+        <div style="padding-bottom: 15px;" class="form-group">
+            <label class="control-label">Translation:</label>
+            <input asp-for="Translation" class="form-control" style="font-size: 25px;" />
+        </div>
+        <div style="padding-bottom: 15px;" class="form-group">
+            <label class="control-label">Note:</label>
+            <textarea asp-for="Note" class="form-control" rows="4"></textarea>
+        </div>
+
+        <div style="padding-bottom: 15px;" class="form-group">
+            <label class="control-label">Deck name:</label>
+            <input asp-for="DeckName" class="form-control" />
+        </div>
+        <div style="padding-bottom: 15px;" class="form-group">
+            <label class="control-label">Textbook name:</label>
+            <input asp-for="BookName" class="form-control" />
+        </div>
+        <div style="padding-bottom: 15px;" class="form-group">
+            <label class="control-label">Lesson unit:</label>
+            <input asp-for="UnitName" class="form-control" />
+        </div>
+            
+        <div class="form-group">
+            <input type="submit" value="Create" class="btn btn-primary buttons" />
+        </div>
+    </form>
+</div>
+
+

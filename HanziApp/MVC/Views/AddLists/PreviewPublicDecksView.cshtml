@@ -1,0 +1,307 @@
+﻿<!-- PreviewPublicDecksView -->
+REDACTED FBI KGB CIA
+
+@{
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+
+    bool deckNameEmpty = Model.All(entity => string.IsNullOrEmpty(entity.DeckName));
+    bool bookNameEmpty = Model.All(entity => string.IsNullOrEmpty(entity.BookName));
+    bool unitNameEmpty = Model.All(entity => string.IsNullOrEmpty(entity.UnitName));
+    bool descriptionEmpty = Model.All(entity => string.IsNullOrEmpty(entity.Deckscription));
+}
+
+<style>
+
+    tbody tr:hover {
+        background-color: rgba(230, 230, 230, 0.35);
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border: 1px solid #ddd;
+        font-size: 20px;
+    }
+
+    th {
+        background-color: #f2f2f2;
+        border: none;
+    }
+
+    .hover-cell {
+        border: none;
+        display: none;
+        position: absolute;
+        padding: 10px;
+        cursor: pointer;
+        z-index: 1; /* Ensure it appears over other cells */
+    }
+
+</style>
+
+<div style="padding-top: 15px; padding-bottom: 15px;" id="partialViewUploadProgress"></div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["FailureMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["FailureMessage"]
+    </div>
+}
+
+<div class="searchbar">
+    @using (Html.BeginForm("PreviewPublicDecks", "AddLists", FormMethod.Get))
+    {
+        <div class="searchbar-main">
+            <input type="hidden" name="sortBy" value="@ViewBag.CurrentSort" />
+            <input type="hidden" name="page" value="@ViewBag.CurrentPage" />
+
+            <div class="row-element">
+                <label for="filterBy">Search: </label>
+                <input type="text" name="filterBy" value="@ViewBag.SearchFilter" />
+
+                <input type="submit" value="Search" />
+            </div>            
+
+            @if (!string.IsNullOrEmpty(ViewBag.SearchFilter))
+            {
+                <a href="@Url.Action("PreviewPublicDecks", "AddLists")">Clear filter</a>
+            }
+        </div>
+    }
+</div>
+
+<table id="myTable" class="table">
+    <!-- tablica -->
+    <thead>
+        <tr>
+            <th>
+                <a href="@Url.Action("PreviewPublicDecks", "AddLists", new { sortBy = ViewBag.SortByCreatedby, filterBy = ViewBag.SearchFilter, page = ViewBag.CurrentPage })" class="table-header"
+                   style="background-color: #f2f2f2; color: #333; padding: 4px 8px; font-size: 18px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; text-decoration: none;"
+                   onmouseover="this.style.backgroundColor='#dcdcdc'" onmouseout="this.style.backgroundColor='#f2f2f2'">
+                    Created by
+                </a>
+            </th>
+
+            @if(!deckNameEmpty)
+            {
+                <th>
+                    <a href="@Url.Action("PreviewPublicDecks", "AddLists", new { sortBy = ViewBag.SortByDeck, filterBy = ViewBag.SearchFilter, page = ViewBag.CurrentPage })" class="table-header"
+                       style="background-color: #f2f2f2; color: #333; padding: 4px 8px; font-size: 18px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; text-decoration: none;"
+                       onmouseover="this.style.backgroundColor='#dcdcdc'" onmouseout="this.style.backgroundColor='#f2f2f2'">
+                        Deck name
+                    </a>
+                </th>
+            }
+            @if (!bookNameEmpty)
+            {
+                <th>
+                    <a href="@Url.Action("PreviewPublicDecks", "AddLists", new { sortBy = ViewBag.SortByTextbook, filterBy = ViewBag.SearchFilter, page = ViewBag.CurrentPage })" class="table-header"
+                    style="background-color: #f2f2f2; color: #333; padding: 4px 8px; font-size: 18px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; text-decoration: none;"
+                    onmouseover="this.style.backgroundColor='#dcdcdc'" onmouseout="this.style.backgroundColor='#f2f2f2'">
+                        Textbook name
+                    </a>
+            </th>
+            }
+            @if (!unitNameEmpty)
+            {
+                <th>
+                    <a href="@Url.Action("PreviewPublicDecks", "AddLists", new { sortBy = ViewBag.SortByLesson, filterBy = ViewBag.SearchFilter, page = ViewBag.CurrentPage })" class="table-header"
+                    style="background-color: #f2f2f2; color: #333; padding: 4px 8px; font-size: 18px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; text-decoration: none;"
+                    onmouseover="this.style.backgroundColor='#dcdcdc'" onmouseout="this.style.backgroundColor='#f2f2f2'">
+                        Lesson unit
+                    </a>
+            </th>
+            }
+            @if (!descriptionEmpty)
+            {
+                <th>
+                    Description
+                </th>
+            }
+            <th>
+                <a href="@Url.Action("PreviewPublicDecks", "AddLists", new { sortBy = ViewBag.SortByCount, filterBy = ViewBag.SearchFilter, page = ViewBag.CurrentPage })" class="table-header"
+                   style="background-color: #f2f2f2; color: #333; padding: 4px 8px; font-size: 18px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; text-decoration: none;"
+                   onmouseover="this.style.backgroundColor='#dcdcdc'" onmouseout="this.style.backgroundColor='#f2f2f2'">
+                    Entries count
+                </a>
+            </th>
+            <th>
+                <a href="@Url.Action("PreviewPublicDecks", "AddLists", new { sortBy = ViewBag.SortByTimesCopied, filterBy = ViewBag.SearchFilter, page = ViewBag.CurrentPage })" class="table-header"
+                   style="background-color: #f2f2f2; color: #333; padding: 4px 8px; font-size: 18px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; text-decoration: none;"
+                   onmouseover="this.style.backgroundColor='#dcdcdc'" onmouseout="this.style.backgroundColor='#f2f2f2'">
+                    Times copied
+                </a>
+            </th>
+            <th>
+                <a href="@Url.Action("PreviewPublicDecks", "AddLists", new { sortBy = ViewBag.SortByTimeAdded, filterBy = ViewBag.SearchFilter, page = ViewBag.CurrentPage })" class="table-header"
+                   style="background-color: #f2f2f2; color: #333; padding: 4px 8px; font-size: 18px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; text-decoration: none;"
+                   onmouseover="this.style.backgroundColor='#dcdcdc'" onmouseout="this.style.backgroundColor='#f2f2f2'">
+                    Created on
+                </a>
+            </th>
+            <th>
+                <a href="@Url.Action("PreviewPublicDecks", "AddLists", new { sortBy = ViewBag.SortByTimeUpdated, filterBy = ViewBag.SearchFilter, page = ViewBag.CurrentPage })" class="table-header"
+                   style="background-color: #f2f2f2; color: #333; padding: 4px 8px; font-size: 18px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; text-decoration: none;"
+                   onmouseover="this.style.backgroundColor='#dcdcdc'" onmouseout="this.style.backgroundColor='#f2f2f2'">
+                    Last update
+                </a>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.CreatedBy)</td>
+                @if (!deckNameEmpty)
+                {
+                    <td>
+                        @{
+                            string truncate = item.DeckName;
+                            if (!string.IsNullOrEmpty(truncate) && truncate.Length > 12)
+                            {
+                                truncate = truncate.Substring(0, 12) + "...";
+                            }
+                        }
+                        <span title="@item.DeckName">@Html.DisplayFor(modelItem => truncate)</span>
+                    </td>
+                }
+                @if (!bookNameEmpty)
+                {
+                    <td>
+                        @{
+                            string truncate = item.BookName;
+                            if (!string.IsNullOrEmpty(truncate) && truncate.Length > 16)
+                            {
+                                truncate = truncate.Substring(0, 16) + "...";
+                            }
+                        }
+                        <span title="@item.BookName">@Html.DisplayFor(modelItem => truncate)</span>
+                    </td>
+                }
+                @if (!unitNameEmpty)
+                {
+                    <td>
+                        @{
+                            string truncate = item.UnitName;
+                            if (!string.IsNullOrEmpty(truncate) && truncate.Length > 12)
+                            {
+                                truncate = truncate.Substring(0, 12) + "...";
+                            }
+                        }
+                        <span title="@item.UnitName">@Html.DisplayFor(modelItem => truncate)</span>
+                    </td>
+                }
+                @if (!descriptionEmpty)
+                {
+                    <td>
+                        @{
+                            string truncate = item.Deckscription;
+                            if (!string.IsNullOrEmpty(truncate) && truncate.Length > 12)
+                            {
+                                truncate = truncate.Substring(0, 12) + "...";
+                            }
+                        }
+                        <span title="@item.Deckscription">@Html.DisplayFor(modelItem => truncate)</span>
+                    </td>
+                }
+                <td>@Html.DisplayFor(modelItem => item.EntriesCount)</td>
+                <td>@Html.DisplayFor(modelItem => item.UsageCount)</td>
+                <td>@(item.TimeAdded.ToString("dd/MM/yyyy"))</td>
+                <td>@(item.TimeUpdated.ToString("dd/MM/yyyy"))</td>
+
+                <td class="hover-cell">
+                    <a href="@Url.Action("ShowDeckDetails", "Deck", new { deckId = item.DeckId })"
+                       style="background-color: #f2f2f2; color: #333; padding: 4px 8px; font-size: 18px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; text-decoration: none;"
+                       onmouseover="this.style.backgroundColor='#dcdcdc'" onmouseout="this.style.backgroundColor='#f2f2f2'">View details</a>
+                
+                    <a href="@Url.Action("AddSelectedPublicDeck", "AddLists", new { deckId = item.DeckId })"
+                       style="background-color: #f2f2f2; color: #333; padding: 4px 8px; font-size: 18px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; text-decoration: none;"
+                       onmouseover="this.style.backgroundColor='#dcdcdc'" onmouseout="this.style.backgroundColor='#f2f2f2'" onclick="startProgressTracking()">Copy this deck</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (totalPages > 1)
+{
+
+    <!-- Page buttons with first and last -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <!-- First page button -->
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")" style="margin-right: 10px;">
+                <a class="page-link" href="@Url.Action("PreviewPublicDecks", "AddLists", new { page = 1, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter })">Go to page 1</a>
+            </li>
+
+            @for (var i = Math.Max(1, currentPage - 4); i <= Math.Min(totalPages, currentPage + 4); i++)
+            {
+                <li class="page-item @(i == currentPage ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("PreviewPublicDecks", "AddLists", new { page = i, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter })">@i</a>
+                </li>
+            }
+
+            <!-- Last page button -->
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")" style="margin-left: 10px;">
+                <a class="page-link" href="@Url.Action("PreviewPublicDecks", "AddLists", new { page = totalPages, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter })">Go to page @totalPages (last)</a>
+            </li>
+
+            <!-- Textbox and Go button for specific page -->
+            <li class="page-item" style="margin-left: 10px;">
+                <input type="text" id="gotoPage" style="width: 50px;" />
+            </li>
+            <li class="page-item" style="margin-left: 10px;">
+                <button id="goButton" class="page-link">Go</button>
+            </li>
+        </ul>
+    </nav>
+
+}
+
+@section Scripts
+    {
+    <script>
+
+        $('#goButton').click(function () {
+            var page = $('#gotoPage').val();
+            var currentSort = '@ViewBag.CurrentSort';
+            var filterBy = '@ViewBag.SearchFilter';
+            window.location.href = '@Url.Action("PreviewPublicDecks", "AddLists")?page=' + page + '&sortBy=' + currentSort + '&filterBy=' + filterBy;
+        });
+
+        function updatePartial() {
+
+            $.get('@Url.Action("GetProgressData", "AddLists")', function (data) {
+                if (data) {
+                    $('#partialViewUploadProgress').html(data);
+                }
+            });
+        }
+
+        function startProgressTracking() {
+
+            setInterval(updatePartial, 500);
+        }
+
+        // show copy / details buttons on row hover
+        $(document).ready(function () {
+            $('#myTable tbody tr').hover(
+                function () {
+                    $(this).find('.hover-cell').show();
+                },
+                function () {
+                    $(this).find('.hover-cell').hide();
+                }
+            );
+        });
+
+    </script>
+}

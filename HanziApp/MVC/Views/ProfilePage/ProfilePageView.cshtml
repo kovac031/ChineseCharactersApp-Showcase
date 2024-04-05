@@ -1,0 +1,156 @@
+﻿<!-- ProfilePageView -->
+
+<style>
+
+    .row-div {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .row-div-buttons {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;        
+    }
+
+    .row-buttons {
+        margin-right: 35px;
+        text-align: center;
+    }
+
+    .first-row-left, .first-row-right {
+        display: flex;
+        flex-direction: column; 
+        padding: 20px;
+    }
+
+    .first-row-left {
+        width: 30%;
+    }
+
+    .first-row-right {
+        width: 70%;
+    }
+
+    .second-row-left, .second-row-right {
+        display: flex;
+        flex-direction: column;
+        width: 50%;
+        padding: 20px;
+    }
+
+    .second-row-right{
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        margin-right: 60px;
+    }
+
+    .buttons {
+        background-color: #f2f2f2;
+        color: #333;
+        padding: 4px 8px;
+        font-size: 18px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+        .buttons:hover {
+            background-color: #dcdcdc;
+            color: #333; /* New background color on hover */
+        }
+</style>
+
+<h1> Your Profile </h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["FailureMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["FailureMessage"]
+    </div>
+}
+
+<div class="row-div">
+
+    <div class="first-row-left" id="partialViewUserDetails">
+        <div id="loading-indicator-user-details">Loading user details...</div>
+    </div>
+
+    <div class="first-row-right" >
+        <div class="row-div-buttons">
+            <div >
+                <a style="display: inline-block; width: 250px;" class="buttons row-buttons" href="@Url.Action("DecksOverviewTable", "Deck")">Browse all your decks</a>
+            </div>
+
+            <div>
+                <a style="display: inline-block; width: 280px;" class="buttons row-buttons" href="@Url.Action("FlashcardsOverviewTable", "Flashcard")">Browse all your flashcards</a>
+            </div>
+        </div>
+        <div style="padding-top: 12px;" id="partialViewHeatmap">
+            <div id="loading-indicator-heatmap">Loading user activity history...</div>
+        </div>        
+    </div>
+
+</div>
+
+<div class="row-div">
+
+    <div class="second-row-left">
+
+        <div id="partialViewHardestCharacters">
+            <div id="loading-indicator-hardest-characters">Loading character difficulty scores...</div>
+        </div>
+
+    </div>
+
+    <div class="second-row-right">
+        Character components feature coming soon ...
+    </div>
+
+</div>
+
+@section Scripts
+    {
+    <script>
+
+        // LOADS PARTIAL VIEWS
+        function loadUserInfo() {
+
+            $.get('@Url.Action("ShowUserDetails", "User")',
+            function (data) {
+                    $('#partialViewUserDetails').html(data);
+                    $('#loading-indicator-user-details').hide();
+            });
+        }
+        // Call the function to initially load the partial view
+        loadUserInfo();
+
+        function getFiveHardestCharacters() {
+
+            $.get('@Url.Action("ShowFiveMostDifficultFlashcards", "Flashcard")',
+                function (data) {
+                    $('#partialViewHardestCharacters').html(data);
+                    $('#loading-indicator-hardest-characters').hide();
+                });
+        }
+        getFiveHardestCharacters();
+
+        function getHeatmap() {
+
+            $.get('@Url.Action("ShowCalendarActivityHeatmap", "ProfilePage")',
+                function (data) {
+                    $('#partialViewHeatmap').html(data);
+                    $('#loading-indicator-heatmap').hide();
+                });
+        }
+        getHeatmap();
+
+    </script>
+}

@@ -1,0 +1,82 @@
+﻿<!-- _FlashcardAddPartialView -->
+REDACTED FBI KGB CIA
+
+<style>
+
+    .buttons {
+        background-color: #f2f2f2;
+        color: #333;
+        padding: 4px 8px;
+        font-size: 18px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+        .buttons:hover {
+            background-color: #dcdcdc;
+            color: #333; /* New background color on hover */
+        }
+</style>
+
+<h4>Add new words to this deck!</h4>
+<p>This is for creating brand new flashcards. If you want to add your existing flashcards to this specific deck, use "Add flashcards from your other decks" instead.</p>
+<div class="row">
+    <div >
+        <form asp-action="AddNewCardFromPartial" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="DeckId" />
+            <input type="hidden" asp-for="DeckName" />
+            <input type="hidden" asp-for="BookName" />
+            <input type="hidden" asp-for="UnitName" />
+
+            <div class="form-group">
+                <label asp-for="Simplified" class="control-label"></label>
+                <input asp-for="Simplified" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Traditional" class="control-label"></label>
+                <input asp-for="Traditional" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Pinyin" class="control-label"></label>
+                <input asp-for="Pinyin" class="form-control" />
+                <span asp-validation-for="Pinyin" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Translation" class="control-label"></label>
+                <input asp-for="Translation" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Note" class="control-label"></label>
+                <textarea asp-for="Note" class="form-control" rows="4"></textarea>
+            </div>
+
+            <div>
+                <div style="float: left; margin-top: 6px;" class="form-group">
+                    <input type="submit" value="Add this to deck" class="btn btn-primary buttons" />
+                </div>
+                
+                <div style="float: right; margin-top: 10px;">
+                    <a class="buttons" href="@Url.Action("ShowAllFlashcardsNotInDeckForSelectionView", "Flashcard", new { deckId = ViewBag.DeckId })">Add flashcards from your other decks</a>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["FailureMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["FailureMessage"]
+    </div>
+}

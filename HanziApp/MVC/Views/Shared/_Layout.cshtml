@@ -1,0 +1,101 @@
+﻿﻿@using System.Security.Claims;
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Practice Chinese</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    
+    @* font ako nema Kaiti *@
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500&display=swap" rel="stylesheet">
+    @* ------------------- *@
+
+    <style>
+
+        .dropdown-items {
+            font-size: 20px;
+            padding: 10px;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-image: url('/images/wallpaper.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed; /* Ensures the background stays fixed even when scrolling */
+            background-size: cover; /* Covers the entire background */
+        }
+        main {
+            flex-grow: 1;
+        }
+
+
+    </style>
+</head>
+<body>
+    <header >
+        <nav style="background-color: rgba(255, 255, 255, 0.5);" class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Home page</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Welcome @User.Identity.Name
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end dropdown-items" aria-labelledby="navbarDropdown">
+                                    REDACTED FBI KGB CIA
+                                </ul>
+                            </li>
+                            <li>
+                                <form method="post" action="@Url.Action("Logout", "Authentication")">
+                                    <button type="submit" class="btn btn-link nav-link">Logout</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li>@Html.ActionLink("Login", "Login", "Authentication", new { area = "" }, new { @class = "nav-link" })</li>
+
+                            <li>@Html.ActionLink("Register", "ShowCreateNewUserView", "User", new { area = "" }, new { @class = "nav-link" })</li>
+                        }
+
+                    </ul>
+                    <div>
+                        <a class="navbar-brand" href="https://forms.gle/ZWV7pRN5RqFJVrDF8">Feedback Form</a>
+                    </div>
+                    <div class="text-right">
+                        <p class="navbar-text">Beta version 1.0</p>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+        <main>
+            <div class="container">
+                @RenderBody()
+            </div>
+        </main>    
+
+    <footer class="border-top footer text-muted text-center pt-3">
+
+            This website does not collect any non-essential cookies.  For all EU GDPR related requests, please contact at "ivan.kovac.app.emailservice@gmail.com".
+
+        </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>

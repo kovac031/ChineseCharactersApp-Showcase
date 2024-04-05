@@ -1,0 +1,289 @@
+﻿<!-- StartPracticeView -->
+REDACTED FBI KGB CIA
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+      
+    .main-div {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .sub-div-left, .sub-div-right {
+        display: flex;
+        flex-direction: column;
+        padding: 30px;
+        width: 50%;
+        font-size: 25px;
+    }
+
+    .sub-div-left {
+        padding-left: 80px;
+    }
+
+    .sub-div-right {
+        padding-right: 80px;
+    }
+
+    .button{
+        padding: 20px;
+        font-size: 30px;
+    }
+
+    .button_small{
+        padding: 10px;
+        font-size: 20px;
+        padding-right: 120px;
+    }
+
+    .dropdown-flashcard-practice { /* .dropdown je i u _layout headeru i glupi kod promijeni i to, pa trebo drugo ime */
+        width: 500px; 
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    /* Increase checkbox size */
+    input[type="checkbox"] {
+        width: 20px; /* Set the desired width */
+        height: 20px; /* Set the desired height */
+    }
+
+
+
+</style>
+
+<body>    
+
+    <h1>Flashcard practice setup screen</h1>
+
+    <form id="selectSettingsForm" action="@Url.Action("FlashcardPractice", "FlashcardPractice")" method="get">
+        <div class="main-div">
+            @Html.HiddenFor(model => model.UserId, new { id = "userId" })
+
+            <div class="sub-div-left">
+                <h3>Show by default:</h3>
+                <div>
+                    <label>
+                        @Html.CheckBoxFor(model => model.ShowSimplified, new { id = "showSimplifiedCheckbox" }) Simplified characters
+                    </label>
+                </div>
+
+                <div>
+                    <label>
+                        @Html.CheckBoxFor(model => model.ShowTraditional, new { id = "showTraditionalCheckbox" }) Traditional characters
+                    </label>
+                </div>
+
+                <div>
+                    <label>
+                        @Html.CheckBoxFor(model => model.ShowPinyin, new { id = "showPinyinCheckbox" }) Pinyin for those characters
+                    </label>
+                </div>
+
+                <div>
+                    <label>
+                        @Html.CheckBoxFor(model => model.ShowTranslation, new { id = "showTranslationCheckbox" }) Your translation
+                    </label>
+                </div>
+
+                <div>
+                    <label>
+                        @Html.CheckBoxFor(model => model.ShowNote, new { id = "showNoteCheckbox" }) Your notes
+                    </label>
+                </div>
+
+                <div class="button">
+                    <input type="submit" value="Start!" id="startButton" style="width: 200px;">
+                </div>
+
+            </div>
+
+            <div class="sub-div-right">
+                <div>
+                    <label for="deck">Select Deck: </label>
+                    <div style="padding-bottom: 15px;">
+                        @Html.DropDownListFor(model => model.LastUsedDeck, ViewBag.DeckSelection as SelectList, "All", new { id = "deckDropdown", @class = "dropdown-flashcard-practice" })
+                    </div>
+                </div>
+
+                <div>
+                    <label for="textbook">Select Textbook: </label>
+                    <div style="padding-bottom: 15px;">
+                        @Html.DropDownListFor(model => model.LastUsedBook, ViewBag.BookSelection as SelectList, "All", new { id = "textbookDropdown", @class = "dropdown-flashcard-practice" })
+                    </div>
+                </div>
+
+                <div id="lessonUnitDropdownDiv">
+                    <label for="lesson">Select Lesson Unit: </label>
+                    <div style="padding-bottom: 15px;">
+                        @Html.DropDownListFor(model => model.LastUsedUnit, ViewBag.UnitSelection as SelectList, "All", new { id = "lessonDropdown", @class = "dropdown-flashcard-practice" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="howMany">Show how many flashcards: </label>
+                    <div style="padding-bottom: 15px;">
+                        @Html.DropDownListFor(model => model.HowMany, new SelectList(new List<int> { 5, 10, 15, 20 }), new { id = "howManyDropdown", @class = "dropdown-flashcard-practice" })
+                    </div>
+                </div>  
+            </div>
+        </div>
+    </form>
+
+    <!-- SUCCESS MESSAGE -->
+    <div>
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+    </div>
+    <!-- FAILURE MESSAGE -->
+    <div>
+        @if (TempData["FailureMessage"] != null)
+        {
+            <div class="alert alert-danger">
+                @TempData["FailureMessage"]
+            </div>
+        }
+    </div>       
+
+    <div style="text-align: right;">
+        <form id="rememberSettingsForm" action="@Url.Action("RememberSelectedSettings", "FlashcardPractice")" method="post">
+
+            @Html.HiddenFor(model => model.UserId, new { id = "hiddenUserId" })
+            @Html.HiddenFor(model => model.LastUsedDeck, new { id = "hiddenLastUsedDeck" })
+            @Html.HiddenFor(model => model.LastUsedBook, new { id = "hiddenLastUsedBook" })
+            @Html.HiddenFor(model => model.LastUsedUnit, new { id = "hiddenLastUsedUnit" })
+            @Html.HiddenFor(model => model.HowMany, new { id = "hiddenHowMany" })
+            @Html.HiddenFor(model => model.ShowSimplified, new { id = "hiddenShowSimplified" })
+            @Html.HiddenFor(model => model.ShowTraditional, new { id = "hiddenShowTraditional" })
+            @Html.HiddenFor(model => model.ShowPinyin, new { id = "hiddenShowPinyin" })
+            @Html.HiddenFor(model => model.ShowTranslation, new { id = "hiddenShowTranslation" })
+            @Html.HiddenFor(model => model.ShowNote, new { id = "hiddenShowNote" })
+
+            <div class="button_small">
+                <input type="submit" value="Save your current settings setup." id="saveSettingsButton" style="width: 500px;">
+            </div>
+        </form>
+    </div>
+</body>
+
+@section Scripts {
+    <script> 
+
+        $(document).ready(function () {
+
+            var selectedDeck = null;
+            var selectedTextbook = null;
+
+            // starts page with lesson unit dropdown hidden unless saved settings have a textbook selected
+            if (!$("#textbookDropdown").val() || $("#textbookDropdown").val() === "All") {
+                $("#lessonUnitDropdownDiv").hide();
+            } else {
+                $("#lessonUnitDropdownDiv").show();
+            }
+
+            // DECK -> TEXTBOOK CASCADE DROPDOWN
+            $("#deckDropdown").change(function () {
+                selectedDeck = $(this).val();
+
+                // Reset selections in textbook and lesson unit dropdowns
+                $("#textbookDropdown").val("All");
+                $("#lessonDropdown").val("All");
+
+                // Make an AJAX call to get lesson units based on the selected deck
+                $.ajax({
+                    url: '@Url.Action("GetTextbooksForDropdownMenu", "FlashcardPractice")',
+                    type: 'GET',
+                    data: { deckName: selectedDeck },
+                    success: function (data) {
+                        // Update the lesson unit dropdown with the new options
+                        $("#textbookDropdown").empty().append('<option value="All">All</option>');
+                        $.each(data, function (index, item) {
+                            $("#textbookDropdown").append('<option value="' + item + '">' + item + '</option>');
+                        });
+
+                        // SHOW/HIDE LESSON UNIT DROPDOWN LOGIC
+                        if (!$("#textbookDropdown").val() || $("#textbookDropdown").val() === "All") {
+                            $("#lessonUnitDropdownDiv").hide();
+                        } else {
+                            $("#lessonUnitDropdownDiv").show();
+                        }
+                    },
+                    error: function () {
+                        console.log('Error fetching lesson units');
+                    }
+                });
+            });
+
+            // TEXTBOOK -> LESSON UNITS CASCADE DROPDOWN
+            $("#textbookDropdown").change(function () {
+                selectedTextbook = $(this).val();
+
+                // Reset selection in lesson unit dropdown
+                $("#lessonDropdown").val("All");
+
+                // Make an AJAX call to get lesson units based on the selected textbook
+                $.ajax({
+                    url: '@Url.Action("GetLessonUnitsForDropdownMenu", "FlashcardPractice")',
+                    type: 'GET',
+                    data: { textbookName: selectedTextbook },
+                    success: function (data) {
+                        // Update the lesson unit dropdown with the new options
+                        $("#lessonDropdown").empty().append('<option value="All">All</option>');
+                        $.each(data, function (index, item) {
+                            $("#lessonDropdown").append('<option value="' + item + '">' + item + '</option>');
+                        });
+
+                        // SHOW/HIDE LESSON UNIT DROPDOWN LOGIC
+                        if (!$("#textbookDropdown").val() || $("#textbookDropdown").val() === "All") {
+                            $("#lessonUnitDropdownDiv").hide();
+                        } else {
+                            $("#lessonUnitDropdownDiv").show();
+                        }
+                    },
+                    error: function () {
+                        console.log('Error fetching lesson units');
+                    }
+                });
+                
+            });   
+
+            //IF user selected ALL, send NULL on form submit
+            $("form").submit(function () {
+                // Replace "All" with null before submitting
+                if ($("#deckDropdown").val() === "All") {
+                    $("#deckDropdown").val(null);
+                }
+                if ($("#textbookDropdown").val() === "All") {
+                    $("#textbookDropdown").val(null);
+                }
+                if ($("#lessonDropdown").val() === "All") {
+                    $("#lessonDropdown").val(null);
+                }                
+            });            
+
+        });
+
+        // COPY SELECTED VALUES FROM FORM TO FORM
+        $('#saveSettingsButton').click(function (e) {
+
+            $('#rememberSettingsForm #hiddenUserId').val($('#selectSettingsForm #userId').val());
+            $('#rememberSettingsForm #hiddenLastUsedDeck').val($('#selectSettingsForm #deckDropdown').val());
+            $('#rememberSettingsForm #hiddenLastUsedBook').val($('#selectSettingsForm #textbookDropdown').val());
+            $('#rememberSettingsForm #hiddenLastUsedUnit').val($('#selectSettingsForm #lessonDropdown').val());
+            $('#rememberSettingsForm #hiddenHowMany').val($('#selectSettingsForm #howManyDropdown').val());
+            $('#rememberSettingsForm #hiddenShowSimplified').val($('#selectSettingsForm #showSimplifiedCheckbox').is(':checked'));
+            $('#rememberSettingsForm #hiddenShowTraditional').val($('#selectSettingsForm #showTraditionalCheckbox').is(':checked'));
+            $('#rememberSettingsForm #hiddenShowPinyin').val($('#selectSettingsForm #showPinyinCheckbox').is(':checked'));
+            $('#rememberSettingsForm #hiddenShowTranslation').val($('#selectSettingsForm #showTranslationCheckbox').is(':checked'));
+            $('#rememberSettingsForm #hiddenShowNote').val($('#selectSettingsForm #showNoteCheckbox').is(':checked'));
+
+        });
+
+    </script>
+}

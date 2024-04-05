@@ -1,0 +1,52 @@
+﻿<!-- _ShowUserDetailsPartialView -->
+REDACTED FBI KGB CIA
+
+<style>
+
+    .buttons {
+        background-color: #f2f2f2;
+        color: #333;
+        padding: 4px 8px;
+        font-size: 18px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s; 
+    }
+
+        .buttons:hover {
+            background-color: #dcdcdc;
+            color: #333; /* New background color on hover */
+        }
+
+</style>
+
+<div>    
+    <dl class="dl-horizontal">
+        <dt>
+            Username:
+        </dt>
+        <dd style="padding-bottom: 15px; font-size: 28px;">
+            @Html.DisplayFor(model => model.Username)
+        </dd>
+
+        <dt>
+            Email address:
+        </dt>
+        <dd style ="padding-bottom: 15px;">
+            @Html.DisplayFor(model => model.EmailAddress)
+        </dd>
+    </dl>
+    <div style="padding-bottom: 15px;">
+        <a class="buttons" href="@Url.Action("ChangeUserInfo", "User", new { selection = "username" })"> Change your username </a>
+    </div>
+
+    <div style="padding-bottom: 15px;">
+        <a class="buttons" href="@Url.Action("ChangeUserInfo", "User", new { selection = "email" })"> Change your email address </a>
+    </div>
+
+    <div style="padding-bottom: 15px;">
+        <a class="buttons" href="@Url.Action("ChangeUserInfo", "User", new { selection = "password" })"> Change your password </a>
+    </div>
+</div>

@@ -1,0 +1,83 @@
+﻿<!-- DeckAddView -->
+REDACTED FBI KGB CIA
+
+<style>
+
+    .mycontainer {
+        padding: 25px;
+    }
+
+    .buttons {
+        background-color: #f2f2f2;
+        color: #333;
+        padding: 4px 8px;
+        font-size: 18px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+        .buttons:hover {
+            background-color: #dcdcdc;
+            color: #333; /* New background color on hover */
+        }
+</style>
+
+<div>
+    <a class="buttons" href="@Url.Action("DecksOverviewTable", "Deck")">Back to decks overview</a>
+</div>
+
+
+<div class="mycontainer">
+    <h4>Create a new blank deck</h4>
+    
+    <form asp-action="AddNewDeck" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div style="padding-bottom: 15px;" class="form-group">
+            <label class="control-label">Deck name:</label>
+            <input asp-for="DeckName" class="form-control" />
+        </div>
+        <div style="padding-bottom: 15px;" class="form-group">
+            <label class="control-label">Textbook name:</label>
+            <input asp-for="BookName" class="form-control" />
+        </div>
+        <div style="padding-bottom: 15px;" class="form-group">
+            <label class="control-label">Lesson unit name:</label>
+            <input asp-for="UnitName" class="form-control" />
+        </div>
+        <div style="padding-bottom: 15px;" class="form-group">
+            <label class="control-label">Description:</label>
+            <textarea asp-for="Deckscription" class="form-control" rows="4"></textarea>
+        </div>
+
+        <div class="form-group">
+            <div style="padding-bottom: 15px;" class="form-check">
+                <input asp-for="MakePublic" class="form-check-input" type="checkbox" />
+                <label class="form-check-label">Make it public?</label>
+            </div>
+        </div>
+
+        <div style="padding-bottom: 15px;" class="form-group">
+            <input type="submit" value="Create" class="btn btn-primary buttons" />
+        </div>
+    </form>
+    
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["FailureMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["FailureMessage"]
+    </div>
+}
+
+

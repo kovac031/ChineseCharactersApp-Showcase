@@ -1,0 +1,94 @@
+﻿REDACTED FBI KGB CIA
+
+<style>
+    .main-div {
+        display: flex;
+        flex-direction: row;
+    }
+
+        .sub-div-left {
+            width: 30%;
+            padding-right: 50px;
+            text-align: right;
+        }
+
+        .sub-div-center {
+            display: flex;
+            flex-direction: column;
+            width: 40%;
+            font-size: 20px;
+            font-family: Calibri;
+            text-align: justify;
+        }
+
+        .sub-div-right {
+            width: 30%;
+            padding-left: 50px;
+            text-align: left;
+            }
+
+    .buttons {
+        background-color: #f2f2f2;
+        color: #333;
+        padding: 4px 8px;
+        font-size: 18px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+        .buttons:hover {
+            background-color: #dcdcdc;
+            color: #333; /* New background color on hover */
+        }
+</style>
+<body>
+    <div class="main-div">
+
+        <div class="sub-div-left">
+            <img src="~/images/banner-left.png" />
+        </div>
+
+        <div class="sub-div-center">
+            <h1>Log in:</h1>
+            <form asp-action="Login">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+                <div class="form-group">
+                    <label asp-for="Username" class="control-label"></label>
+                    <input asp-for="Username" class="form-control" />
+                    @* <span asp-validation-for="Username" class="text-danger"></span> *@
+                </div>
+                <div class="form-group" style="padding-bottom: 15px;">
+                    <label asp-for="Password" class="control-label"></label>
+                    <input asp-for="Password" class="form-control" type="password" />
+                    @* <span asp-validation-for="Password" class="text-danger"></span> *@
+                </div>
+            
+                <div class="form-group">
+                    <input type="submit" value="Sign in" class="btn btn-primary buttons" />
+                </div>
+            </form>
+
+            @if (TempData["FailureMessage"] != null)
+            {
+                <div class="alert alert-danger">
+                    @TempData["FailureMessage"]
+                </div>
+            }
+
+            <div style="font-size: 14px;">
+                <a href="@Url.Action("ShowPasswordRecoveryView", "User")"> Forgot your password? </a>
+            </div>
+
+        </div>
+
+        <div class="sub-div-right">
+            <img src="~/images/banner-right.png" />
+        </div>
+
+    </div>
+    
+</body>

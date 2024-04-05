@@ -1,0 +1,335 @@
+﻿<!-- _FlashcardsTablePartialView -->
+
+<!--
+    Deck/ShowDeckDetails (DeckDetailsView) // public decks
+    Deck/EditDeckFromView (DeckEditView) // user's decks
+-->
+REDACTED FBI KGB CIA
+
+@{
+    string id = ViewBag.UserId;
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+
+    string currentUrl = ViewBag.CurrentUrl; // gets the current URL, so I can dynamically populate redirects and so reuse this partial with any method and controller
+    string[] urlSegments = currentUrl.Split('/');
+
+    string controllerName = urlSegments[1];
+    string methodRedirect = urlSegments[2];  
+
+    // checks if all empty in column
+    bool simplifiedEmpty = Model.All(entity => string.IsNullOrEmpty(entity.Simplified));
+    bool traditionalEmpty = Model.All(entity => string.IsNullOrEmpty(entity.Traditional));
+    bool noteEmpty = Model.All(entity => string.IsNullOrEmpty(entity.Note));
+
+    bool isNoDeck = ViewBag.IsNoDeck;
+}
+
+<style>
+    .main-sort-div {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .sub-sort-div {
+        padding: 10px;
+        padding-right: 30px;
+    }
+
+    .buttons {
+        background-color: #f2f2f2;
+        color: #333;
+        padding: 4px 8px;
+        font-size: 18px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+        .buttons:hover {
+            background-color: #dcdcdc;
+            color: #333;
+        }
+
+    tbody tr:hover {
+        background-color: rgba(230, 230, 230, 0.35);
+    }
+
+</style>
+
+@if(Model.Count() == 0)
+{
+    <span>This deck is empty.</span>
+}
+else
+{
+    <!-- FILTER FORM -->
+    <div class="table-filter-settings-main">
+        <div class="table-filter-settings-searchbar">
+            @using (Html.BeginForm(methodRedirect, controllerName, FormMethod.Get))
+            {
+                <div class="table-filter-settings-main">
+                    <input type="hidden" name="deckId" value="@ViewBag.DeckId" />
+                    <input type="hidden" name="sortBy" value="@ViewBag.CurrentSort" />
+                    <input type="hidden" name="page" value="@ViewBag.CurrentPage" />
+
+                    <div class="row-element">
+                        <label for="filterBy">Search: </label>
+                        <input type="text" name="filterBy" value="@ViewBag.SearchFilter" />
+                        <input type="submit" value="Search" />
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(ViewBag.SearchFilter))
+                    {
+                        <a href="@Url.Action(methodRedirect, controllerName, new { deckId = ViewBag.DeckId })">Clear filter</a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (methodRedirect != "ShowDeckDetails")
+    {
+        <!-- SORTING EXTRA OPTIONS -->
+        <div class="main-sort-div">
+            <div class="sub-sort-div">
+                <a href="@Url.Action(methodRedirect, controllerName, new { deckId = ViewBag.DeckId, page = ViewBag.CurrentPage, sortBy = ViewBag.SortByDifficulty, filterBy = ViewBag.SearchFilter })" class="buttons">
+                    Sort by your difficulty rating
+                    @if (ViewBag.CurrentSort == "score_asc")
+                    {
+                        <span>↓ easiest first</span>
+                    }
+                    else if (ViewBag.CurrentSort == "score_desc")
+                    {
+                        <span>↓ hardest first</span>
+                    }
+                </a>
+            </div>
+            <div class="sub-sort-div">
+                <a href="@Url.Action(methodRedirect, controllerName, new { deckId = ViewBag.DeckId, page = ViewBag.CurrentPage, sortBy = ViewBag.SortByTimeAdded, filterBy = ViewBag.SearchFilter })" class="buttons">
+                    Sort by time created
+                    @if (ViewBag.CurrentSort == "added_asc")
+                    {
+                        <span>↓ newest first</span>
+                    }
+                    else if (ViewBag.CurrentSort == "added_desc")
+                    {
+                        <span>↓ oldest first</span>
+                    }
+                </a>
+            </div>
+            <div class="sub-sort-div">
+                <a href="@Url.Action(methodRedirect, controllerName, new { deckId = ViewBag.DeckId, page = ViewBag.CurrentPage, sortBy = ViewBag.SortByTimeUpdated, filterBy = ViewBag.SearchFilter })" class="buttons">
+                    Sort by time updated
+                    @if (ViewBag.CurrentSort == "updated_asc")
+                    {
+                        <span>↓ newest first</span>
+                    }
+                    else if (ViewBag.CurrentSort == "updated_desc")
+                    {
+                        <span>↓ oldest first</span>
+                    }
+                </a>
+            </div>
+        </div>
+    }
+
+    <!-- TABLE WITH HEADER SORTING -->
+    <table class="table" id="myTable">
+        <thead>
+            <tr>
+                @if (!simplifiedEmpty)
+                {
+                    <th>
+                        <a href="@Url.Action(methodRedirect, controllerName, new { deckId = ViewBag.DeckId, page = ViewBag.CurrentPage, sortBy = ViewBag.SortByCharacters, filterBy = ViewBag.SearchFilter })" class="buttons">
+                            Simplified
+                            @if (string.IsNullOrEmpty(ViewBag.CurrentSort))
+                            {
+                                <span>↓ from first</span>
+                            }
+                            else if (ViewBag.CurrentSort == "char_desc")
+                            {
+                                <span>↓ from last</span>
+                            }
+                        </a>
+                    </th>
+                }
+                @if (!traditionalEmpty)
+                {
+                    <th>
+                        <a href="@Url.Action(methodRedirect, controllerName, new { deckId = ViewBag.DeckId, page = ViewBag.CurrentPage, sortBy = ViewBag.SortByCharacters, filterBy = ViewBag.SearchFilter })" class="buttons">
+                            Traditional
+                            @if (string.IsNullOrEmpty(ViewBag.CurrentSort))
+                            {
+                                <span>↓ from first</span>
+                            }
+                            else if (ViewBag.CurrentSort == "char_desc")
+                            {
+                                <span>↓ from last</span>
+                            }
+                        </a>
+                    </th>
+                }
+                <th>
+                    <a href="@Url.Action(methodRedirect, controllerName, new { deckId = ViewBag.DeckId, page = ViewBag.CurrentPage, sortBy = ViewBag.SortByPinyin, filterBy = ViewBag.SearchFilter })" class="buttons">
+                        Pinyin
+                        @if (ViewBag.CurrentSort == "pinyin_asc")
+                        {
+                            <span>↓ from "a"</span>
+                        }
+                        else if (ViewBag.CurrentSort == "pinyin_desc")
+                        {
+                            <span>↓ from "z"</span>
+                        }
+                    </a>
+                </th>
+                <th>
+                    <a href="@Url.Action(methodRedirect, controllerName, new { deckId = ViewBag.DeckId, page = ViewBag.CurrentPage, sortBy = ViewBag.SortByTranslation, filterBy = ViewBag.SearchFilter })" class="buttons">
+                        Translation
+                        @if (ViewBag.CurrentSort == "transl_asc")
+                        {
+                            <span>↓ from "a"</span>
+                        }
+                        else if (ViewBag.CurrentSort == "transl_desc")
+                        {
+                            <span>↓ from "z"</span>
+                        }
+                    </a>
+                </th>
+                @if (!noteEmpty)
+                {
+                    <th>@Html.DisplayNameFor(model => model.Note)</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    @if (!simplifiedEmpty)
+                    {
+                        <td style="font-family: 'KaiTi', 'Noto Serif SC'; font-size: 28px;">
+                            @{
+                                string simplified = item.Simplified;
+                                if (!string.IsNullOrEmpty(simplified) && simplified.Length > 8)
+                                {
+                                    simplified = simplified.Substring(0, 8) + "(...)";
+                                }
+                            }
+                            <span title="@item.Simplified">@Html.DisplayFor(modelItem => simplified)</span>
+                        </td>
+                    }
+                    @if (!traditionalEmpty)
+                    {
+                        <td style="font-family: 'KaiTi', 'Noto Serif SC'; font-size: 28px;">
+                            @{
+                                string traditional = item.Traditional;
+                                if (!string.IsNullOrEmpty(traditional) && traditional.Length > 8)
+                                {
+                                    traditional = traditional.Substring(0, 8) + "(...)";
+                                }
+                            }
+                            <span title="@item.Traditional">@Html.DisplayFor(modelItem => traditional)</span>
+                        </td>
+                    }
+                    <td style="font-size: 18px;">
+                        @{
+                            string pinyin = item.Pinyin;
+                            if (!string.IsNullOrEmpty(pinyin) && pinyin.Length > 80)
+                            {
+                                pinyin = pinyin.Substring(0, 80) + "(...)";
+                            }
+                        }
+                        <span title="@item.Pinyin">@Html.DisplayFor(modelItem => pinyin)</span>
+                    </td>
+                    <td style="font-size: 18px;">
+                        @{
+                            string translation = item.Translation;
+                            if (!string.IsNullOrEmpty(translation) && translation.Length > 80)
+                            {
+                                translation = translation.Substring(0, 80) + "(...)";
+                            }
+                        }
+                        <span title="@item.Translation">@Html.DisplayFor(modelItem => translation)</span>
+                    </td>
+                    @if (!noteEmpty)
+                    {
+                        <td style="font-size: 18px;">
+                            @{
+                                string note = item.Note;
+                                if (!string.IsNullOrEmpty(note) && note.Length > 30)
+                                {
+                                    note = note.Substring(0, 30) + "(...)";
+                                }
+                            }
+                            <span title="@item.Note">@Html.DisplayFor(modelItem => note)</span>
+                        </td>
+                    }
+                    @if (methodRedirect != "ShowDeckDetails")
+                    {
+                        if (!isNoDeck)
+                        {
+                            <td class="hover-cell" style="margin-left: -50px; margin-top: -2px;">
+                                <button class="buttons" style="cursor: pointer;" title="This will only remove this flashcard from this deck. It will not permanently delete the flashcard itself.">
+                                    <a style="text-decoration: none; color: #333;" href="@Url.Action("RemoveFlashcardFromDeck", "Deck", new { deckId = ViewBag.DeckId, flashcardId = item.Id, page = ViewBag.CurrentPage, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter })">Remove from deck</a>
+                                </button>
+                                <button class="buttons">
+                                    <a style="text-decoration: none; color: #333;" href="@Url.Action("ShowFlashcardEditView", "Flashcard", new { id = item.Id, source = currentUrl, deck = ViewBag.DeckId, page = ViewBag.CurrentPage, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter })">Details & Edit</a>
+                                </button>
+                            </td>
+                        }
+                        else
+                        {
+                            <td class="hover-cell" style="margin-top: -2px;">
+                                <button class="buttons">
+                                    <a style="text-decoration: none; color: #333;" href="@Url.Action("ShowFlashcardEditView", "Flashcard", new { id = item.Id, source = currentUrl, deck = ViewBag.DeckId, page = ViewBag.CurrentPage, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter })">Details & Edit</a>
+                                </button>
+                            </td>
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Previous and Next buttons with padding between them -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")" style="margin-right: 20px;">
+                <a class="page-link" href="@Url.Action(methodRedirect, controllerName, new { page = currentPage - 1, deckId = ViewBag.DeckId, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter })">Previous</a>
+            </li>
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action(methodRedirect, controllerName, new { page = currentPage + 1, deckId = ViewBag.DeckId, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter })">Next</a>
+            </li>
+        </ul>
+    </nav>
+
+
+    <!-- Page buttons with first and last -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <!-- First page button -->
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")" style="margin-right: 10px;">
+                <a class="page-link" href="@Url.Action(methodRedirect, controllerName, new { page = 1, deckId = ViewBag.DeckId, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter })">Go to page 1</a>
+            </li>
+
+            @for (var i = Math.Max(1, currentPage - 4); i <= Math.Min(totalPages, currentPage + 4); i++)
+            {
+                <li class="page-item @(i == currentPage ? "active" : "")">
+                    <a class="page-link" href="@Url.Action(methodRedirect, controllerName, new { page = i, deckId = ViewBag.DeckId, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter })">@i</a>
+                </li>
+            }
+
+            <!-- Last page button -->
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")" style="margin-left: 10px;">
+                <a class="page-link" href="@Url.Action(methodRedirect, controllerName, new { page = totalPages, deckId = ViewBag.DeckId, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter })">Go to page @totalPages (last)</a>
+            </li>
+
+        </ul>
+    </nav>
+}
+
+
+

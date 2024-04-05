@@ -1,0 +1,185 @@
+﻿<!-- DeckEditView -->
+REDACTED FBI KGB CIA
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+@{
+    bool isNoDeck = ViewBag.IsNoDeck;
+}
+<style>
+
+    .buttons {
+        background-color: #f2f2f2;
+        color: #333;
+        padding: 4px 8px;
+        font-size: 18px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+        margin: 0 auto;
+        vertical-align: middle;
+    }
+
+        .buttons:hover {
+            background-color: #dcdcdc;
+            color: #333; /* New background color on hover */
+        }
+
+    .main-div {
+        display: flex;
+        flex-direction: row;
+        padding-bottom: 30px;
+    }
+
+        .top-div-left {
+            width: 50%;
+        }
+
+        .top-div-right {
+            width: 50%;
+            text-align: right;
+        }
+
+        .sub-div-left {        
+            width: 50%;
+            padding-right: 50px;
+        }
+
+        .sub-div-right {
+            width: 50%;
+            padding-left: 50px;
+        }
+
+    .hover-cell {
+        border: none;
+        display: none;
+        position: absolute;
+        margin-top: -8px;
+        cursor: pointer;
+        z-index: 1; /* Ensure it appears over other cells */
+    }
+
+</style>
+
+<div class="main-div">
+
+    <div class="top-div-left">
+        <a class="buttons" href="@Url.Action("DecksOverviewTable", "Deck")">Back to your decks overview</a>
+    </div>
+
+    @if(!isNoDeck)
+    {
+        <div class="top-div-right">
+            <a class="buttons" style="cursor: pointer;" title="This will only delete the deck itself and NOT your flashcards. Your vocabulary collection will not be affected." href="@Url.Action("DeleteDeck", "Deck", new { deckId = Model.Id })">Delete this deck</a>
+        </div>
+    }    
+
+</div>
+
+@if (isNoDeck)
+{
+    <div class="main-div">
+        <h2>You are browsing flashcards which are not assigned to any deck.</h2>
+    </div>
+}
+else
+{    
+    <div class="main-div">
+        <div class="sub-div-left">
+            <h2>Here you can view and edit this deck.</h2>
+            <form asp-action="EditDeckFromView" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+
+                <div class="form-group">
+                    <label class="control-label">Deck name:</label>
+                    <input asp-for="DeckName" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Textbook title:</label>
+                    <input asp-for="BookName" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Lesson unit title:</label>
+                    <input asp-for="UnitName" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Description of this deck:</label>
+                    <textarea asp-for="Deckscription" class="form-control" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <div class="form-check">
+                        <input asp-for="MakePublic" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label">Make it public?</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <input type="submit" value="Save changes" class="btn btn-primary buttons" />
+                </div>
+            </form>
+        </div>
+
+        <div class="sub-div-right" id="partialViewAddNew"></div>
+    </div>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["FailureMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["FailureMessage"]
+        </div>
+    }
+    
+}
+<div id="partial-div">
+    <div id="partialViewFlashcards"></div>
+</div>
+
+@section Scripts
+    {
+    <script>
+        var id = '@ViewBag.DeckId';
+        var page = '@ViewBag.CurrentPage';
+        var sortBy = '@ViewBag.CurrentSort';
+        var filterBy = '@ViewBag.SearchFilter';
+        var currentUrl = '@ViewBag.CurrentUrl';
+
+        function updatePartial() {
+
+            $.get('@Url.Action("ShowFlashcardsForDeckPartialView", "Flashcard")', { deckId: id, page: page, sortBy: sortBy, filterBy: filterBy, urlString: currentUrl }, function (data) {
+                if (data) {
+                    $('#partialViewFlashcards').html(data);
+                } else {
+                    // Display a message when no data is found
+                    $('#partialViewFlashcards').html('<p>This deck is empty.</p>');
+                }
+            });
+
+
+            $.get('@Url.Action("ShowAddCardToDeckPartialView", "Flashcard")', { deckId: id }, function (data) {
+                $('#partialViewAddNew').html(data);
+            });
+        }
+
+        // Call the function to initially load the partial view
+        updatePartial();
+
+        // show delete / details buttons on row hover
+        $(document).ready(function () {
+            $('#partial-div').on('mouseenter', '#myTable tbody tr', function () {
+                $(this).find('.hover-cell').show();
+            }).on('mouseleave', '#myTable tbody tr', function () {
+                $(this).find('.hover-cell').hide();
+            });
+        });
+
+    </script>
+}
+

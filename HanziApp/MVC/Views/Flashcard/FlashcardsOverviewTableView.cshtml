@@ -1,0 +1,537 @@
+﻿<!-- FlashcardsOverviewTable -->
+REDACTED FBI KGB CIA
+
+@{
+    Guid id = ViewBag.UserId;
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+
+    int totalCount = @ViewBag.SelectionCount;
+
+    // checks if all empty in column
+    bool simplifiedEmpty = Model.All(entity => string.IsNullOrEmpty(entity.Simplified));
+    bool traditionalEmpty = Model.All(entity => string.IsNullOrEmpty(entity.Traditional));
+    bool noteEmpty = Model.All(entity => string.IsNullOrEmpty(entity.Note)); 
+    
+    string currentUrl = ViewBag.CurrentUrl;
+}
+
+<style>
+
+    .buttons {
+        background-color: #f2f2f2;
+        color: #333;
+        padding: 4px 8px;
+        font-size: 18px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+        .buttons:hover {
+            background-color: #dcdcdc;
+            color: #333; /* New background color on hover */
+        }
+
+    tbody tr:hover {
+        background-color: rgba(230, 230, 230, 0.35);
+    }
+
+    .main-div {
+        display: flex;
+        flex-direction: row;
+        padding-bottom: 30px;
+    }
+
+        .top-div-left {
+            width: 50%;
+        }
+
+        .top-div-right {
+            width: 50%;
+            text-align: right;
+        }
+
+        .sub-div-left {
+            width: 50%;
+            padding-right: 50px;
+        }
+
+        .sub-div-right {
+            width: 50%;
+            padding-left: 50px;
+        }
+
+    .main-sort-div {
+        display: flex;
+        flex-direction: row;
+    }
+
+        .sub-sort-div {
+            padding: 10px;
+            padding-right: 15px;
+        }
+
+    .dropdown-flashcard-practice { /* .dropdown je i u _layout headeru i glupi kod promijeni i to, pa trebo drugo ime */
+        width: 500px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    .hover-cell {
+        border: none;
+        display: none;
+        position: absolute;
+        margin-top: -2px;
+        cursor: pointer;
+        z-index: 1; /* Ensure it appears over other cells */
+    }
+
+</style>
+
+<div class="main-div">
+
+    <div class="top-div-left">
+        <a class="buttons" href="@Url.Action("ShowProfilePage", "ProfilePage")">Back to profile page</a>
+    </div>
+
+    <div class="top-div-right">
+        <a class="buttons" href="@Url.Action("ShowCreateView", "Flashcard")"><strong>ADD NEW FLASHCARD</strong></a>
+    </div>
+
+</div>
+
+<h3>Overview</h3>
+<p>Here you can browse all your flashcards.</p>
+
+@if (totalCount == 0)
+{
+    <p>... but you currently have no flashcards. Add some vocabulary first.</p>
+}
+else
+{
+    <div>Loaded <strong>@totalCount</strong> flashcards based on your selection criteria.</div>
+    <br />
+
+    <div class="main-div">
+
+        <div class="sub-div-left">
+            <!-- --------------- DECKS DROPDOWN MENU --------------- -->
+            @using (Html.BeginForm("FlashcardsOverviewTable", "Flashcard", FormMethod.Get))
+            {
+                <div style="font-size: 20px;" class="table-filter-settings-decks">
+                    <input type="hidden" name="bookName" value="@ViewBag.TextbookName" />
+                    <input type="hidden" name="lessonName" value="@ViewBag.LessonUnit" />
+                    <div>
+                        <label for="deck">Select Deck: </label>
+                        <div style="padding-bottom: 15px;">
+                            @Html.DropDownList("deckName", ViewBag.DeckSelection as SelectList, "All", new { @class = "dropdown-flashcard-practice" })
+                        </div>
+                    </div>
+                    <input type="submit" value="Apply" />
+                </div>
+            }
+
+            <!-- ------------------- FILTERING ----------------------- -->
+            @using (Html.BeginForm("FlashcardsOverviewTable", "Flashcard", FormMethod.Get))
+            {
+                <div style="padding-top: 30px;" class="table-filter-settings-main">
+                    <input type="hidden" name="sortBy" value="@ViewBag.CurrentSort" />
+                    <input type="hidden" name="page" value="@ViewBag.CurrentPage" />
+
+                    <div class="row-element">
+                        <label for="filterBy">Search: </label>
+                        <input type="text" name="filterBy" value="@ViewBag.SearchFilter" />
+                        <input type="submit" value="Search" />
+
+                        @if (!string.IsNullOrEmpty(ViewBag.SearchFilter))
+                        {
+                            <a href="@Url.Action("FlashcardsOverviewTable", "Flashcard")">Clear filter</a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="sub-div-right">
+            <!-- --------------- TEXTBOOK/LESSONS DROPDOWN MENU --------------- -->
+            @using (Html.BeginForm("FlashcardsOverviewTable", "Flashcard", FormMethod.Get))
+            {
+                <div style="font-size: 20px;" class="table-filter-settings-textbookandlessons">
+                    <input type="hidden" name="deckName" value="@ViewBag.DeckName" />
+
+                    <div>
+                        <label for="textbook">Select Textbook: </label>
+                        <div style="padding-bottom: 15px;">
+                            @Html.DropDownList("bookName", ViewBag.BookSelection as SelectList, "All", new { @class = "dropdown-flashcard-practice" })
+                        </div>
+                    </div>
+                    <div>
+                        <label for="lesson">Select Lesson Unit: </label>
+                        <div style="padding-bottom: 15px;">
+                            @Html.DropDownList("lessonName", ViewBag.UnitSelection as SelectList, "All", new { @class = "dropdown-flashcard-practice" })
+                        </div>
+                    </div>
+                    <input type="submit" value="Apply" />
+                </div>
+            }
+        </div>
+
+    </div>
+
+    <div class="main-sort-div">
+        <div class="sub-sort-div">
+            <a href="@Url.Action("FlashcardsOverviewTable", "Flashcard", new { page = ViewBag.CurrentPage, sortBy = ViewBag.SortByDifficulty, filterBy = ViewBag.SearchFilter, deckName = ViewBag.DeckName, bookName = ViewBag.TextbookName, lessonName = ViewBag.LessonUnit })" class="buttons">
+                Sort by your difficulty rating
+                @if (ViewBag.CurrentSort == "score_asc")
+                {
+                    <span>↓ easiest first</span>
+                }
+                else if (ViewBag.CurrentSort == "score_desc")
+                {
+                    <span>↓ hardest first</span>
+                }
+            </a>
+        </div>
+        <div class="sub-sort-div">
+            <a href="@Url.Action("FlashcardsOverviewTable", "Flashcard", new { page = ViewBag.CurrentPage, sortBy = ViewBag.SortByTimeAdded, filterBy = ViewBag.SearchFilter, deckName = ViewBag.DeckName, bookName = ViewBag.TextbookName, lessonName = ViewBag.LessonUnit })" class="buttons">
+                Sort by time created
+                @if (ViewBag.CurrentSort == "added_asc")
+                {
+                    <span>↓ newest first</span>
+                }
+                else if (ViewBag.CurrentSort == "added_desc")
+                {
+                    <span>↓ oldest first</span>
+                }
+            </a>
+        </div>
+        <div class="sub-sort-div">
+            <a href="@Url.Action("FlashcardsOverviewTable", "Flashcard", new { page = ViewBag.CurrentPage, sortBy = ViewBag.SortByTimeUpdated, filterBy = ViewBag.SearchFilter, deckName = ViewBag.DeckName, bookName = ViewBag.TextbookName, lessonName = ViewBag.LessonUnit })" class="buttons">
+                Sort by time updated
+                @if (ViewBag.CurrentSort == "updated_asc")
+                {
+                    <span>↓ newest first</span>
+                }
+                else if (ViewBag.CurrentSort == "updated_desc")
+                {
+                    <span>↓ oldest first</span>
+                }
+            </a>
+        </div>
+    </div>
+
+    <table id="myTable" class="table">
+        <thead>
+            <tr>
+                @if (!simplifiedEmpty)
+                {
+                    <th>
+                        <a href="@Url.Action("FlashcardsOverviewTable", "Flashcard", new { page = ViewBag.CurrentPage, sortBy = ViewBag.SortByCharacters, filterBy = ViewBag.SearchFilter, deckName = ViewBag.DeckName, bookName = ViewBag.TextbookName, lessonName = ViewBag.LessonUnit })" class="buttons">
+                            Simplified
+                            @if (string.IsNullOrEmpty(ViewBag.CurrentSort))
+                            {
+                                <span>↓ from first</span>
+                            }
+                            else if (ViewBag.CurrentSort == "char_desc")
+                            {
+                                <span>↓ from last</span>
+                            }
+                        </a>
+                    </th>
+                }
+                @if (!traditionalEmpty)
+                {
+                    <th>
+                        <a href="@Url.Action("FlashcardsOverviewTable", "Flashcard", new { page = ViewBag.CurrentPage, sortBy = ViewBag.SortByCharacters, filterBy = ViewBag.SearchFilter, deckName = ViewBag.DeckName, bookName = ViewBag.TextbookName, lessonName = ViewBag.LessonUnit })" class="buttons">
+                            Traditional
+                            @if (string.IsNullOrEmpty(ViewBag.CurrentSort))
+                            {
+                                <span>↓ from first</span>
+                            }
+                            else if (ViewBag.CurrentSort == "char_desc")
+                            {
+                                <span>↓ from last</span>
+                            }
+                        </a>
+                    </th>
+                }
+                <th>
+                    <a href="@Url.Action("FlashcardsOverviewTable", "Flashcard", new { page = ViewBag.CurrentPage, sortBy = ViewBag.SortByPinyin, filterBy = ViewBag.SearchFilter, deckName = ViewBag.DeckName, bookName = ViewBag.TextbookName, lessonName = ViewBag.LessonUnit })" class="buttons">
+                        Pinyin
+                        @if (ViewBag.CurrentSort == "pinyin_asc")
+                        {
+                            <span>↓ from "a"</span>
+                        }
+                        else if (ViewBag.CurrentSort == "pinyin_desc")
+                        {
+                            <span>↓ from "z"</span>
+                        }
+                    </a>
+                </th>
+                <th>
+                    <a href="@Url.Action("FlashcardsOverviewTable", "Flashcard", new { page = ViewBag.CurrentPage, sortBy = ViewBag.SortByTranslation, filterBy = ViewBag.SearchFilter, deckName = ViewBag.DeckName, bookName = ViewBag.TextbookName, lessonName = ViewBag.LessonUnit })" class="buttons">
+                        Translation
+                        @if (ViewBag.CurrentSort == "transl_asc")
+                        {
+                            <span>↓ from "a"</span>
+                        }
+                        else if (ViewBag.CurrentSort == "transl_desc")
+                        {
+                            <span>↓ from "z"</span>
+                        }
+                    </a>
+                </th>
+                @if (!noteEmpty)
+                {
+                    <th>@Html.DisplayNameFor(model => model.Note)</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    @if (!simplifiedEmpty)
+                    {
+                        <td style="font-family: 'KaiTi', 'Noto Serif SC'; font-size: 28px;">
+                            @{
+                                string simplified = item.Simplified;
+                                if (!string.IsNullOrEmpty(simplified) && simplified.Length > 8)
+                                {
+                                    simplified = simplified.Substring(0, 8) + "(...)";
+                                }
+                            }
+                            <span title="@item.Simplified">@Html.DisplayFor(modelItem => simplified)</span>
+                        </td>
+                    }
+                    @if (!traditionalEmpty)
+                    {
+                        <td style="font-family: 'KaiTi', 'Noto Serif SC'; font-size: 28px;">
+                            @{
+                                string traditional = item.Traditional;
+                                if (!string.IsNullOrEmpty(traditional) && traditional.Length > 8)
+                                {
+                                    traditional = traditional.Substring(0, 8) + "(...)";
+                                }
+                            }
+                            <span title="@item.Traditional">@Html.DisplayFor(modelItem => traditional)</span>
+                        </td>
+                    }
+                    <td style="font-size: 18px;">
+                        @{
+                            string pinyin = item.Pinyin;
+                            if (!string.IsNullOrEmpty(pinyin) && pinyin.Length > 80)
+                            {
+                                pinyin = pinyin.Substring(0, 80) + "(...)";
+                            }
+                        }
+                        <span title="@item.Pinyin">@Html.DisplayFor(modelItem => pinyin)</span>
+                    </td>
+                    <td style="font-size: 18px;">
+                        @{
+                            string translation = item.Translation;
+                            if (!string.IsNullOrEmpty(translation) && translation.Length > 80)
+                            {
+                                translation = translation.Substring(0, 80) + "(...)";
+                            }
+                        }
+                        <span title="@item.Translation">@Html.DisplayFor(modelItem => translation)</span>
+                    </td>
+                    @if (!noteEmpty)
+                    {
+                        <td style="font-size: 18px;">
+                            @{
+                                string note = item.Note;
+                                if (!string.IsNullOrEmpty(note) && note.Length > 30)
+                                {
+                                    note = note.Substring(0, 30) + "(...)";
+                                }
+                            }
+                            <span title="@item.Note">@Html.DisplayFor(modelItem => note)</span>
+                        </td>
+                    }
+                    <td class="hover-cell">
+                        <button class="buttons" title="WARNING! This will delete this entry from your account, including all your decks.">
+                            <a style="text-decoration: none; color: #333;" href="@Url.Action("DeleteCard", "Flashcard", new { id = item.Id, source = currentUrl, page = ViewBag.CurrentPage, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter, deckName = ViewBag.DeckName, bookName = ViewBag.TextbookName, lessonName = ViewBag.LessonUnit })">Delete</a>
+                        </button>
+                        <button class="buttons">
+                            <a style="text-decoration: none; color: #333;" href="@Url.Action("ShowFlashcardEditView", "Flashcard", new { id = item.Id, source = currentUrl, page = ViewBag.CurrentPage, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter, deckName = ViewBag.DeckName, bookName = ViewBag.TextbookName, lessonName = ViewBag.LessonUnit })">Edit Flashcard</a>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Previous and Next buttons with padding between them -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")" style="margin-right: 20px;">
+                <a class="page-link" href="@Url.Action("FlashcardsOverviewTable", "Flashcard", new { page = currentPage - 1, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter, deckName = ViewBag.DeckName, bookName = ViewBag.TextbookName, lessonName = ViewBag.LessonUnit })">Previous</a>
+            </li>
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("FlashcardsOverviewTable", "Flashcard", new { page = currentPage + 1, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter, deckName = ViewBag.DeckName, bookName = ViewBag.TextbookName, lessonName = ViewBag.LessonUnit })">Next</a>
+            </li>
+        </ul>
+    </nav>
+
+
+    <!-- Page buttons with first and last -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <!-- First page button -->
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")" style="margin-right: 10px;">
+                <a class="page-link" href="@Url.Action("FlashcardsOverviewTable", "Flashcard", new { page = 1, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter, deckName = ViewBag.DeckName, bookName = ViewBag.TextbookName, lessonName = ViewBag.LessonUnit })">Go to page 1</a>
+            </li>
+
+            @for (var i = Math.Max(1, currentPage - 4); i <= Math.Min(totalPages, currentPage + 4); i++)
+            {
+                <li class="page-item @(i == currentPage ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("FlashcardsOverviewTable", "Flashcard", new { page = i, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter, deckName = ViewBag.DeckName, bookName = ViewBag.TextbookName, lessonName = ViewBag.LessonUnit })">@i</a>
+                </li>
+            }
+
+            <!-- Last page button -->
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")" style="margin-left: 10px;">
+                <a class="page-link" href="@Url.Action("FlashcardsOverviewTable", "Flashcard", new { page = totalPages, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter, deckName = ViewBag.DeckName, bookName = ViewBag.TextbookName, lessonName = ViewBag.LessonUnit })">Go to page @totalPages (last)</a>
+            </li>
+
+            <!-- Textbox and Go button for specific page -->
+            <li class="page-item" style="margin-left: 10px;">
+                <input type="text" id="gotoPage" style="width: 50px;" />
+            </li>
+            <li class="page-item" style="margin-left: 10px;">
+                <button id="goButton" class="page-link">Go</button>
+            </li>
+        </ul>
+    </nav>
+}
+
+@section Scripts
+    {
+    <script>
+        var id = '@id';
+
+        $('#goButton').click(function () {
+            var page = $('#gotoPage').val();
+            var currentSort = '@ViewBag.CurrentSort';
+            var filterBy = '@ViewBag.SearchFilter';
+            var deckName = '@ViewBag.DeckName';
+            var bookName = '@ViewBag.TextbookName';
+            var lessonName = '@ViewBag.LessonUnit';
+            window.location.href = '@Url.Action("FlashcardsOverviewTable", "Flashcard")?page=' + page + '&sortBy=' + currentSort + '&filterBy=' + filterBy + '&DeckName=' + deckName + '&TextbookName=' + bookName + '&LessonUnit=' + lessonName;
+        });
+
+        // show hover-cell buttons on row hover
+        $(document).ready(function () {
+            $('#myTable tbody tr').hover(
+                function () {
+                    $(this).find('.hover-cell').show();
+                },
+                function () {
+                    $(this).find('.hover-cell').hide();
+                }
+            );
+        });
+                
+        // dynamically populate the drop downs 
+        $(document).ready(function () {
+
+            var selectedDeck = null;
+            var selectedTextbook = null;
+
+            // starts page with lesson unit dropdown hidden unless saved settings have a textbook selected
+            if (!$("#textbookDropdown").val() || $("#textbookDropdown").val() === "All") {
+                $("#lessonUnitDropdownDiv").hide();
+            } else {
+                $("#lessonUnitDropdownDiv").show();
+            }
+
+            // DECK -> TEXTBOOK CASCADE DROPDOWN
+            $("#deckDropdown").change(function () {
+                selectedDeck = $(this).val();
+
+                // Reset selections in textbook and lesson unit dropdowns
+                $("#textbookDropdown").val("All");
+                $("#lessonDropdown").val("All");
+
+                // Make an AJAX call to get lesson units based on the selected deck
+                $.ajax({
+                    url: '@Url.Action("GetTextbooksForDropdownMenu", "FlashcardPractice")',
+                    type: 'GET',
+                    data: { deckName: selectedDeck },
+                    success: function (data) {
+                        // Update the lesson unit dropdown with the new options
+                        $("#textbookDropdown").empty().append('<option value="All">All</option>');
+                        $.each(data, function (index, item) {
+                            $("#textbookDropdown").append('<option value="' + item + '">' + item + '</option>');
+                        });
+
+                        // SHOW/HIDE LESSON UNIT DROPDOWN LOGIC
+                        if (!$("#textbookDropdown").val() || $("#textbookDropdown").val() === "All") {
+                            $("#lessonUnitDropdownDiv").hide();
+                        } else {
+                            $("#lessonUnitDropdownDiv").show();
+                        }
+                    },
+                    error: function () {
+                        console.log('Error fetching lesson units');
+                    }
+                });
+            });
+
+            // TEXTBOOK -> LESSON UNITS CASCADE DROPDOWN
+            $("#textbookDropdown").change(function () {
+                selectedTextbook = $(this).val();
+
+                // Reset selection in lesson unit dropdown
+                $("#lessonDropdown").val("All");
+
+                // Make an AJAX call to get lesson units based on the selected textbook
+                $.ajax({
+                    url: '@Url.Action("GetLessonUnitsForDropdownMenu", "FlashcardPractice")',
+                    type: 'GET',
+                    data: { textbookName: selectedTextbook },
+                    success: function (data) {
+                        // Update the lesson unit dropdown with the new options
+                        $("#lessonDropdown").empty().append('<option value="All">All</option>');
+                        $.each(data, function (index, item) {
+                            $("#lessonDropdown").append('<option value="' + item + '">' + item + '</option>');
+                        });
+
+                        // SHOW/HIDE LESSON UNIT DROPDOWN LOGIC
+                        if (!$("#textbookDropdown").val() || $("#textbookDropdown").val() === "All") {
+                            $("#lessonUnitDropdownDiv").hide();
+                        } else {
+                            $("#lessonUnitDropdownDiv").show();
+                        }
+                    },
+                    error: function () {
+                        console.log('Error fetching lesson units');
+                    }
+                });
+
+            });
+
+            //IF user selected ALL, send NULL on form submit
+            $("form").submit(function () {
+                // Replace "All" with null before submitting
+                if ($("#deckDropdown").val() === "All") {
+                    $("#deckDropdown").val(null);
+                }
+                if ($("#textbookDropdown").val() === "All") {
+                    $("#textbookDropdown").val(null);
+                }
+                if ($("#lessonDropdown").val() === "All") {
+                    $("#lessonDropdown").val(null);
+                }
+            });
+
+        });
+
+    </script>
+}

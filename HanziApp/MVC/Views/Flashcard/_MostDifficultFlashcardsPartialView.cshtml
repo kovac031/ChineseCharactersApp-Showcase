@@ -1,0 +1,54 @@
+﻿<!-- _MostDifficultFlashcardsPartialView -->
+REDACTED FBI KGB CIA
+
+<style>
+    .difficult-chars-table{
+        border-collapse: collapse; /* Remove space between table cells */
+        width: 80%;
+    }    
+        .difficult-chars-table td {
+            padding: 10px;
+            font-family: 'KaiTi', 'Noto Serif SC';
+            font-size: 40px;
+            text-align: center;
+            border-bottom: 25px solid transparent;
+        }
+
+</style>
+
+<p>Five entries you find the most difficult to remember are:</p>
+@if (Model.Count() >= 5)
+{
+    <table class="difficult-chars-table">
+        <tbody>
+            <tr>
+                @foreach (var item in Model)
+                {
+                    if (!string.IsNullOrEmpty(item.Simplified))
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Simplified)
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Traditional)
+                        </td>
+                    }
+                }
+            </tr>
+        </tbody>
+    </table>
+
+    <form asp-controller="FlashcardPractice" asp-action="LaunchFlashcardPracticeForMostDifficultFive" method="post">
+        <div class="form-group">
+            <input style="width: 200px;" type="submit" value="Practice these!" class="btn btn-primary buttons" />
+        </div>
+    </form>
+    
+}
+else
+{
+    <p>Not enough practice data to separate five entries.</p>
+}

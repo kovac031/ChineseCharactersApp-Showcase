@@ -1,0 +1,366 @@
+﻿REDACTED FBI KGB CIA
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+@{
+    int index = ViewBag.CurrentIndex ?? 0;
+    int nextIndex = ViewBag.NextIndex;
+    int howMany = ViewBag.Settings.HowMany;
+
+    bool showSimplified = ViewBag.Settings.ShowSimplified;
+    bool showTraditional = ViewBag.Settings.ShowTraditional;
+    bool showPinyin = ViewBag.Settings.ShowPinyin;
+    bool showTranslation = ViewBag.Settings.ShowTranslation;
+    bool showNote = ViewBag.Settings.ShowNote;
+
+    bool onlySimplified = showSimplified && !showTraditional;
+    bool onlyTraditional = showTraditional && !showSimplified;
+    bool showBoth = showSimplified && showTraditional;
+
+    int characterCount = Model.Simplified?.Length ?? Model.Traditional?.Length ?? 0;
+    int fontSize;
+    int marginOffsetRight;
+    int marginOffsetTop;
+    int padding;
+    if (characterCount == 1)
+    { 
+        fontSize = 280;
+        marginOffsetRight = 350;
+        marginOffsetTop = 30;
+        padding = 400;
+    }
+    else if (characterCount == 2)
+    { 
+        fontSize = 260; 
+        marginOffsetRight = 200;
+        marginOffsetTop = 50;
+        padding = 280;
+    }
+    else if (characterCount == 3)
+    { 
+        fontSize = 240; 
+        marginOffsetRight = 50;
+        marginOffsetTop = 50;
+        padding = 200;
+    }
+    else if (characterCount == 4)
+    { 
+        fontSize = 220; 
+        marginOffsetRight = 0;
+        marginOffsetTop = 70;
+        padding = 70;
+    }
+    else if (characterCount < 9)
+    {
+        fontSize = 150;
+        marginOffsetRight = 850;
+        marginOffsetTop = 270;
+        padding = 0;
+    }
+    else
+    {
+        fontSize = 100;
+        marginOffsetRight = 850;
+        marginOffsetTop = 270;
+        padding = 0;
+    }
+}
+<!-- ------------- STYLE BLOCK ----------------->
+
+<style> 
+
+    .buttons {
+        background-color: #f2f2f2;
+        color: #333;
+        padding: 4px 8px;
+        font-size: 18px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+        .buttons:hover {
+            background-color: #dcdcdc;
+            color: #333; /* New background color on hover */
+        }
+
+    .characters {
+        display: flex;
+        flex-direction: row;
+        font-family: 'KaiTi', 'Noto Serif SC';
+        height: 360px; /* the div will always occupy the same amount of space, in terms of height */
+    }
+        .characters-primary {
+            display: flex;
+            flex-grow: 1;
+            align-items: center;
+            justify-content: center;
+            padding-right: 25px;
+            font-size: @(fontSize)px;
+        }
+        .characters-secondary {
+            padding-left: 25px;
+            font-size: @(fontSize / 3)px;        
+        }
+
+    .showhide-buttons-div{          
+        display: flex;
+        flex-direction: row;
+        justify-content: center; /* centrira horizontalno */
+        padding-bottom: 30px;
+    }
+
+    .bottom-content{
+        display: grid;
+        grid-template-columns: 5fr 2fr;
+        width: 100%;
+        padding-top: 50px;
+    }
+
+    .pinyin-translation-notes{
+        width: 80%;
+        /* border: 1px solid #ccc; */
+        font-size: 3vw;
+        font-family: Calibri;
+        text-align: right;
+    }
+
+    .bottom-right-column{
+        /* border: 1px solid #ccc; */
+        font-size: 1.2vw;
+        font-family: Calibri;
+    }
+
+    .difficulty-buttons-and-nav{
+        background-color: #f2f2f2;
+        color: #333;
+        padding: 4px 8px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        margin: 4px 2px;
+        width: 100%;
+        transition: background-color 0.3s;
+    }
+
+    .difficulty-buttons-and-nav:hover {
+            background-color: #dcdcdc;
+            color: #333; /* New background color on hover */
+    }
+
+    .easy-green:focus {
+        background-color: #8ED09D;
+    }
+
+    .medium-yellow:focus {
+        background-color: #F9E299;
+    }
+
+    .hard-red:focus {
+        background-color: #E57373;
+    }
+
+    .partial-edit{
+        padding: 10px;
+        font-size: 1.5vw;
+        font-family: Calibri;
+    }
+
+
+</style>
+
+<div class="showhide-buttons-div" style="position: relative; z-index: 1;">
+    @if (!string.IsNullOrEmpty(Model.Simplified) && onlyTraditional && !showBoth)
+    {
+        <div style="padding-inline: 5px;">
+            <button style="padding-inline: 20px;" id="tickSimplified" class="show-button buttons @(showSimplified ? "active" : "")">Simplified</button>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(Model.Traditional) && onlySimplified && !showBoth)
+    {
+        <div style="padding-inline: 5px;">
+            <button style="padding-inline: 20px;" id="tickTraditional" class="show-button buttons @(showTraditional ? "active" : "")">Traditional</button>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(Model.Pinyin))
+    {
+        <div style="padding-inline: 5px;">
+            <button style="padding-inline: 20px;" id="tickPinyin" class="show-button buttons @(showPinyin ? "active" : "")">Pinyin</button>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(Model.Translation))
+    {
+        <div style="padding-inline: 5px;">
+            <button style="padding-inline: 20px;" id="tickTranslation" class="show-button buttons @(showTranslation ? "active" : "")">Translation</button>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(Model.Note))
+    {
+        <div style="padding-inline: 5px;">
+            <button style="padding-inline: 20px;" id="tickNote" class="show-button buttons @(showNote ? "active" : "")">Notes</button>
+        </div>
+    }
+</div>
+
+@if (onlySimplified || showBoth)
+{
+    <div class="characters">
+
+        <div class="characters-primary">
+            <span id="simplified" style="display: @(showSimplified ? "block" : "none")">@Model.Simplified</span>
+        </div>
+
+        <div class="characters-secondary">
+            <span id="traditional" style="padding-right: @(padding)px; margin-left: -@(marginOffsetRight)px; margin-top: @(marginOffsetTop)px; display: @(showTraditional ? "block" : "none")">@Model.Traditional</span>
+        </div>
+
+    </div>
+}
+else if (onlyTraditional)
+{
+    <div class="characters">
+
+        <div class="characters-primary">
+            <span id="traditional" style="display: @(showTraditional ? "block" : "none")">@Model.Traditional</span>
+        </div>
+
+        <div class="characters-secondary">
+            <span id="simplified" style="padding-right: @(padding)px; margin-left: -@(marginOffsetRight)px; margin-top: @(marginOffsetTop)px; display: @(showSimplified ? "block" : "none")">@Model.Simplified</span>
+        </div>
+
+    </div>
+}
+
+<div class="bottom-content">
+
+    <div class="pinyin-translation-notes">
+        <div>
+            <p id="pinyin" style="display: @(showPinyin ? "block" : "none")">@Model.Pinyin</p>
+        </div>
+        <div>
+            <p id="translation" style="display: @(showTranslation ? "block" : "none")">@Model.Translation</p>
+        </div>
+        <div>
+            <p id="note" style="display: @(showNote ? "block" : "none")">@Model.Note</p>
+        </div>
+
+        <div>
+            <!-- SUCCESS MESSAGE -->
+            <div>
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success" style="font-size: 30px; text-align: center;">
+                        @TempData["SuccessMessage"]
+                    </div>
+                }
+            </div>
+        </div>            
+    </div>
+
+    <div class="bottom-right-column">
+        
+    <!-- Difficulty rating buttons -->
+        <div>
+            <button type="button" class="difficulty-buttons-and-nav easy-green" onclick="assignRating(3)">Easy</button>
+        </div>
+
+        <div>
+            <button type="button" class="difficulty-buttons-and-nav medium-yellow" onclick="assignRating(2)">Medium</button>
+        </div>
+
+        <div>
+            <button type="button" class="difficulty-buttons-and-nav hard-red" onclick="assignRating(1)">Hard</button>
+        </div>
+
+        <div>
+            <!-- PAGE NAVIGATION -->
+            <div>
+                @if (nextIndex < howMany)
+                {
+                    <p>
+                        <a href="javascript:void(0);" class="difficulty-buttons-and-nav" onclick="triggerUpdate('@Url.Action("FlashcardPractice", "FlashcardPractice", new { index = nextIndex })')">Next Character</a>
+                    </p>
+                }
+                else
+                {
+                    <p>
+                        <a href="javascript:void(0);" class="difficulty-buttons-and-nav" onclick="triggerUpdate('@Url.Action("FlashcardPractice", "FlashcardPractice", new { index = nextIndex })')">Well done!</a>
+                    </p>
+                }
+            </div>
+
+        </div>
+
+    </div>        
+
+</div>
+
+<div class="partial-edit">
+    <!-- PARTIAL VIEW FOR EDIT -->
+    <div>
+        <button onclick="showEditForm(@index)">Quick edit</button>
+
+        <!-- Hidden div for editing -->
+        <div id="editDiv" style="display: none;"></div>
+    </div>
+</div>
+
+<script>
+    function showEditForm(index) {
+        $.ajax({
+            url: '@Url.Action("ShowFlashcardEditPartialView", "Flashcard")',
+            type: 'GET',
+            data: { index: index },
+            success: function (response) {
+                $('#editDiv').html(response).show(); // Display the div
+                $('#editDiv').find('input[name="index"]').val(index); // Set the hidden index field
+            },
+            error: function () {
+                alert('Error occurred');
+            }
+        });
+    }
+
+    function triggerUpdate(url) {
+        var index = url.match(/index=(\d+)/)[1];
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("PassDifficultyButtonPressValues", "FlashcardPractice")",
+            data: { index: index - 1, buttonValue: assignedButtonValue }, // Use assignedButtonValue
+            success: function (data) {
+                // Handle success if needed
+                window.location.href = url; // Navigate after the update
+            },
+            error: function () {
+                // Handle error if needed
+            }
+        });
+    }
+    
+    var assignedButtonValue = 0; // Initialize the variable
+
+    function assignRating(value) {
+        assignedButtonValue = value;
+    }
+
+    // ---------- show/hide logic -----------
+
+    function toggleVisibility(button, elementId) {
+        const element = document.getElementById(elementId);
+        element.style.display = button.classList.contains("active") ? "block" : "none";
+    }
+
+    // Add event listeners for each button
+    document.querySelectorAll(".show-button").forEach(function (button) {
+        button.addEventListener("click", function () {
+            this.classList.toggle("active");
+            toggleVisibility(this, this.id.replace("tick", "").toLowerCase());
+        });
+    });
+
+</script>

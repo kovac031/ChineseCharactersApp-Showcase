@@ -1,0 +1,143 @@
+﻿<!-- _CalendarActivityHeatmapPartialView -->
+REDACTED FBI KGB CIA
+
+
+
+<style>
+    table#calendar {
+        border-collapse: collapse; /* removes default styling */
+        transform: scale(0.95); /* Adjust the scale factor as needed */
+        transform-origin: left;
+    }
+
+    #calendar th, #calendar td {
+        border: 4px solid #F7FDFD;
+        border-radius: 7px;
+        
+    }
+
+    #calendar td {
+        box-sizing: border-box; /* Include padding and border in the specified width */
+        width: calc(100% / (53));
+    }
+
+    .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(1,148,77, 0.15);
+        opacity: 0;
+        transition: opacity 0.1s ease;
+        border-radius: 7px;
+    }
+
+    /* what to do with cells marked "to-highlight" */
+    td#to-highlight {
+        position: relative; /* breaks the table if set to absolute */
+        cursor: default; /* to keep the cursor as arrow */
+    }
+    /* on hover, add the .overlay element over the cells marked "to-highlight" */
+    td#to-highlight:hover .overlay {
+        opacity: 1; /* 0 - 1 */
+    }
+
+</style>
+
+@if(ViewBag.BetterThan <= 50) // don't show message if the user isn't very active
+{
+    <div>
+        Your practice history puts you in the top @ViewBag.BetterThan % of active users!
+    </div>
+}
+else
+{
+    <div>
+        Here is your practice history:
+    </div>
+}
+
+
+
+<table id="calendar" style="background-color:rgb(245, 240, 235)">
+    <tbody>
+        <tr>
+            <td colspan="1"></td>
+            <td colspan="53" style="text-align: center; font-size: 18px;">
+                @for (int month = 1; month <= 12; month++)
+                {
+                    <span style="display: inline-block; width: calc(87.5% / 12);">
+                        @CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(month)
+                    </span>
+                }
+            </td>
+        </tr>
+        @{
+            string[] daysOfWeek = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+            int totalDays = 366; // Assuming you have 366 days in a year
+            int totalRows = 7;
+            DateTime startDate = new DateTime(2024, 1, 1); // Start date
+
+            // Calculate the offset to align the start date with the correct day of the week
+            int startDayOffset = ((int)startDate.DayOfWeek - 1 + 7) % 7;
+
+            for (int row = 0; row < totalRows; row++)
+            {
+                <tr>
+                    <td style="font-size: 16px;">@daysOfWeek[row] </td>
+                    @for (int col = 0; col < totalDays / totalRows + 1; col++)
+                    {
+                        int currentDay = row + col * totalRows + 1 - startDayOffset;
+                        DateTime currentDate = startDate.AddDays(currentDay - 1);
+
+                        string backgroundColor;
+
+                        // Find the corresponding model in the list for the current date
+                        CalendarHeatmapModel currentItem = Model.FirstOrDefault(m => m.ThatDay.Date == currentDate.Date);
+                        @if (currentItem != null)
+                        {
+                            if (currentItem.TotalPractice >= 1 && currentItem.TotalPractice < 4)
+                            {
+                                backgroundColor = $"rgb(194,247,221)";
+                            }
+                            else if (currentItem.TotalPractice >= 4 && currentItem.TotalPractice < 8)
+                            {
+                                backgroundColor = $"rgb(160,242,202)";
+                            }
+                            else if (currentItem.TotalPractice >= 8 && currentItem.TotalPractice < 13)
+                            {
+                                backgroundColor = $"rgb(125,237,183)";
+                            }
+                            else if (currentItem.TotalPractice >= 13 && currentItem.TotalPractice < 19)
+                            {
+                                backgroundColor = $"rgb(29,215,126)";
+                            }
+                            else
+                            {
+                                backgroundColor = $"rgb(1,224,5)"; // Default color if TotalPractice is outside defined ranges
+                            }
+                            <td id="to-highlight" style="background-color:@backgroundColor; height: 5px;">
+                                <div class="overlay">
+                                    <span title="Practiced @currentItem.TotalPractice times on @currentDate.ToString("dd-MM-yyyy")" style="opacity: 0;">
+                                        ✔
+                                    </span>
+                                </div>
+                            </td>
+                        }
+                        else
+                        {
+                            <td id="to-highlight" style="height: 5px;">
+                                <div class="overlay"></div>
+                                <span>&nbsp;</span>
+                            </td>
+                        }
+                    }
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+
+

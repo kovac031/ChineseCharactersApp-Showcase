@@ -1,0 +1,182 @@
+﻿<!-- DeckDetailsView -->
+<!-- shows from View Details button on Public Decks overview -->
+REDACTED FBI KGB CIA
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+
+    .buttons {
+        background-color: #f2f2f2;
+        color: #333;
+        padding: 8px;
+        font-size: 18px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+        .buttons:hover {
+            background-color: #dcdcdc;
+            color: #333; /* New background color on hover */
+        }
+
+    .main-div {
+        display: flex;
+        flex-direction: row;
+    }
+        .sub-div-left {
+            width: 50%;
+            padding-right: 50px;
+        }
+
+        .sub-div-right {
+            width: 50%;
+            padding-left: 50px;
+            text-align: right;
+        }
+
+    .deck-div {
+        display: flex;
+        flex-direction: row;
+        padding: 20px;
+    }
+
+    .deck-div-sub {
+        width: 50%;
+    }
+
+</style>
+
+<div class="main-div">
+
+    <div class="sub-div-left">
+        <a class="buttons" href="@Url.Action("PreviewPublicDecks", "AddLists")">Back to public decks overview</a>
+    </div>
+
+    <div class="sub-div-right">
+        <a class="buttons" href="@Url.Action("AddSelectedPublicDeck", "AddLists", new { deckId = ViewBag.DeckId })" onclick="startProgressTracking()">Copy this deck</a>
+    </div>
+
+</div>
+
+<div class="deck-div">
+    <div class="deck-div-sub">
+        @if(!string.IsNullOrEmpty(Model.DeckName))
+        {
+            <div style="padding-bottom: 15px;">
+                <strong>Deck name:</strong><br>
+                <span style="font-size: 30px;">@Html.DisplayFor(model => model.DeckName)</span>
+            </div>
+        }
+        @if(!string.IsNullOrEmpty(Model.BookName))
+        {
+            <div style="padding-bottom: 15px;">
+                <strong>Textbook name:</strong><br>
+                <span style="font-size: 22px;">@Html.DisplayFor(model => model.BookName)</span>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(Model.UnitName))
+        {
+            <div style="padding-bottom: 15px;">
+                <strong>Name of the lesson unit:</strong><br>
+                <span style="font-size: 22px;">@Html.DisplayFor(model => model.UnitName)</span>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(Model.Deckscription))
+        {
+            <div style="padding-bottom: 15px;">
+                <strong>Description:</strong><br>
+                <span style="font-size: 18px;">@Html.DisplayFor(model => model.Deckscription)</span>
+            </div>
+        }
+        else
+        {
+            <div style="padding-bottom: 15px;">
+                <strong>Description:</strong><br>
+                <span style="font-size: 18px;">...</span>
+            </div>
+        }         
+    </div>
+    <div class="deck-div-sub">
+        <div style="padding-bottom: 15px;">
+            <strong>Number of flashcards in this deck:</strong><br>
+            <span style="font-size: 18px;">@Html.DisplayFor(model => model.EntriesCount)</span>
+        </div>
+        <div style="padding-bottom: 15px;">
+            <strong>Created on:</strong><br>
+            <span style="font-size: 18px;">@Model.TimeAdded.ToString("dd/MM/yyyy")</span>
+        </div> 
+        <div style="padding-bottom: 15px;">
+            <strong>Last updated on:</strong><br>
+            <span style="font-size: 18px;">@Model.TimeUpdated.ToString("dd/MM/yyyy")</span>
+        </div> 
+        @if(Model.UsageCount > 0)
+        {
+            <div style="padding-bottom: 15px;">
+                <strong>Times copied by other users:</strong><br>
+                <span style="font-size: 18px;">@Html.DisplayFor(model => model.UsageCount)</span>
+            </div>
+        }        
+    </div>
+</div>
+
+<div style="padding-top: 15px; padding-bottom: 15px;" id="partialViewUploadProgress"></div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["FailureMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["FailureMessage"]
+    </div>
+}
+
+<div id="partialViewFlashcards"></div>
+
+@section Scripts
+    {
+    <script>
+
+        var id = '@ViewBag.DeckId';
+        var page = '@ViewBag.CurrentPage';
+        var sortBy = '@ViewBag.CurrentSort';
+        var filterBy = '@ViewBag.SearchFilter';
+        var currentUrl = '@ViewBag.CurrentUrl';
+
+        function updatePartial() {
+
+            $.get('@Url.Action("ShowFlashcardsForDeckPartialView", "Flashcard")', { deckId: id, page: page, sortBy: sortBy, filterBy: filterBy, urlString: currentUrl }, function (data) {
+                if (data) {
+                    $('#partialViewFlashcards').html(data);
+                } else {
+                    // Display a message when no data is found
+                    $('#partialViewFlashcards').html('<p>This deck is empty.</p>');
+                }
+            });
+        }
+
+        // Call the function to initially load the partial view
+        updatePartial();
+
+        // progress bar
+        function updateProgressBar() {
+            $.get('@Url.Action("GetProgressData", "AddLists")', function (data) {
+                if (data) {
+                    $('#partialViewUploadProgress').html(data);
+                }
+            });
+        }
+        function startProgressTracking() {
+
+            setInterval(updateProgressBar, 500);
+        }
+
+    </script>
+}

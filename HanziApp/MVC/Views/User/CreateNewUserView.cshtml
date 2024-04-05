@@ -1,0 +1,104 @@
+﻿<!-- CreateNewUserView -->
+REDACTED FBI KGB CIA
+
+<style>
+    body {
+        resize: none;
+    }
+
+    .main-div {
+        display: flex;
+        flex-direction: row;
+    }
+
+        .sub-div-left {
+            width: 30%;
+            padding-right: 50px;
+            text-align: right;
+        }
+
+        .sub-div-center {
+            display: flex;
+            flex-direction: column;
+            width: 40%;
+            font-size: 20px;
+            font-family: Calibri;
+            text-align: justify;
+        }
+
+        .sub-div-right {
+            width: 30%;
+            padding-left: 50px;
+            text-align: left;
+        }
+
+    .buttons {
+        background-color: #f2f2f2;
+        color: #333;
+        padding: 4px 8px;
+        font-size: 18px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+        .buttons:hover {
+            background-color: #dcdcdc;
+            color: #333; /* New background color on hover */
+        }
+</style>
+
+
+<body>
+    <div class="main-div">
+
+        <div class="sub-div-left">
+            <img src="~/images/banner-left.png" />
+        </div>
+
+        <div class="sub-div-center">
+            <h3>Register a new user account</h3>
+            <form asp-action="CreateNewUser" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="UserRole" />
+                <input type="hidden" asp-for="TimeAdded" />
+
+                <div class="form-group">
+                    <label>Your desired username:</label>
+                    <input asp-for="Username" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Your desired password:</label>
+                    <input asp-for="Password" class="form-control" type="password" />
+                </div>
+                <div class="form-group" style="padding-bottom: 15px;">
+                    <label>Your email address:</label>
+                    <input asp-for="EmailAddress" class="form-control" />
+                </div>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success">
+                        @TempData["SuccessMessage"]
+                    </div>
+                }
+                @if (TempData["FailureMessage"] != null)
+                {
+                    <div class="alert alert-danger">
+                        @TempData["FailureMessage"]
+                    </div>
+                }
+
+                <div class="form-group">
+                    <input type="submit" value="Create" class="btn btn-primary buttons" />
+                </div>
+            </form>
+        </div>
+        <div class="sub-div-right">
+            <img src="~/images/banner-right.png" />
+        </div>
+    </div>
+</body>

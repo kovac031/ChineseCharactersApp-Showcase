@@ -1,0 +1,272 @@
+﻿<!-- FlashcardEditView -->
+REDACTED FBI KGB CIA
+
+@{
+    string currentUrl = ViewBag.CurrentUrl; // gets the current URL, so I can dynamically populate redirects and so reuse this partial with any method and controller
+    string[] urlSegments = currentUrl.Split('/');
+
+    string controllerName = urlSegments[1];
+    string methodRedirect = urlSegments[2];
+    string marginSize = "";
+}
+
+<style>
+
+    .main-div {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .sub-div-left, .sub-div-right {
+        display: flex;
+        flex-direction: column;
+        width: 50%;
+    }
+
+    .buttons {
+        background-color: #f2f2f2;
+        color: #333;
+        padding: 4px 8px;
+        font-size: 18px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+        .buttons:hover {
+            background-color: #dcdcdc;
+            color: #333; /* New background color on hover */
+        }
+            
+
+</style>
+
+<div style="position: relative; z-index: 1;">
+    <a class="buttons" href="@Url.Action(methodRedirect, controllerName, new { deckId = ViewBag.DeckId, page = ViewBag.CurrentPage, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter, deckName = ViewBag.DeckName, bookName = ViewBag.TextbookName, lessonName = ViewBag.LessonUnit  })">Back to overview</a>
+</div>
+
+<div class="main-div">
+    <div class="sub-div-left">
+        @if (!string.IsNullOrEmpty(Model.Simplified))
+        {
+            if (Model.Simplified.Length > 4)
+            {
+                <div style="padding-top: 25px;">
+                    <span id="primaryCharacter" style="font-family: 'KaiTi', 'Noto Serif SC';">@Model.Simplified</span>
+                </div>
+            }
+            else
+            {
+                @if (Model.Simplified.Length == 1)
+                {
+                    marginSize = "-10%";
+                }
+                else if (Model.Simplified.Length == 2)
+                {
+                    marginSize = "-8%";
+                }
+                else if (Model.Simplified.Length == 3)
+                {
+                    marginSize = "-4%";
+                }
+                else if (Model.Simplified.Length == 4)
+                {
+                    marginSize = "-2%";
+                }
+                else
+                {
+                    marginSize = "5%";
+                }
+                <div style="margin-top: @marginSize;">
+                    <span id="primaryCharacter" style="font-family: 'KaiTi', 'Noto Serif SC'; border: 1px solid #ccc;">@Model.Simplified</span>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.Traditional))
+            {
+                @if (Model.Traditional.Length == 1)
+                {
+                    marginSize = "-18%";
+                }
+                else if (Model.Traditional.Length == 2)
+                {
+                    marginSize = "-15%";
+                }
+                else if (Model.Traditional.Length == 3)
+                {
+                    marginSize = "-7%";
+                }
+                else if (Model.Traditional.Length == 4)
+                {
+                    marginSize = "-4%";
+                }
+                else
+                {
+                    marginSize = "5%";
+                }
+                <div style="padding-bottom: 30px; margin-top: @marginSize;">
+                    <span id="secondaryCharacter" style="font-family: 'KaiTi', 'Noto Serif SC';">@Model.Traditional</span>
+                </div>
+            }
+        }
+        else if (!string.IsNullOrEmpty(Model.Traditional))
+        {            
+            if (Model.Traditional.Length > 4)
+            {
+                <div style="padding-bottom: 30px;">
+                    <span id="primaryCharacter" style="font-family: 'KaiTi', 'Noto Serif SC';">@Model.Traditional</span>
+                </div>
+            }
+            else
+            {
+                @if (Model.Traditional.Length == 1)
+                {
+                    marginSize = "-10%";
+                }
+                else if (Model.Traditional.Length == 2)
+                {
+                    marginSize = "-8%";
+                }
+                else if (Model.Traditional.Length == 3)
+                {
+                    marginSize = "-4%";
+                }
+                else if (Model.Traditional.Length == 4)
+                {
+                    marginSize = "-2%";
+                }
+                else
+                {
+                    marginSize = "5%";
+                }
+                <div style="padding-bottom: 30px; margin-top: @marginSize;">
+                    <span id="primaryCharacter" style="font-family: 'KaiTi', 'Noto Serif SC'; border: 1px solid #ccc;">@Model.Traditional</span>
+                </div>
+            }            
+        }
+        <div style="padding-bottom: 15px;">
+            <label><strong>Pinyin:</strong></label><br />
+            <span style="display: block; text-align: center; font-size: 28px;">@Model.Pinyin</span>
+        </div>
+
+        <div style="padding-bottom: 15px;">
+            <label><strong>Translation:</strong></label><br />
+            <span style="display: block; text-align: center; font-size: 28px;">@Model.Translation</span>
+        </div>
+
+        <div style="padding-bottom: 15px;">
+            <label><strong>Note:</strong></label><br />
+            <span style="display: block; text-align: center; font-size: 20px;">
+                @if (string.IsNullOrEmpty(Model.Note))
+                {
+                    <p>...</p>
+                }
+                else
+                {
+                    @Model.Note
+                }
+            </span>
+        </div>
+
+    </div>
+
+    <div class="sub-div-right">
+
+        <h1>You are updating this entry</h1>
+
+        <form asp-action="EditFlashcardFromView" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" name="source" value="@ViewBag.CurrentUrl" />
+            <input type="hidden" name="deck" value="@ViewBag.DeckId" />
+
+
+            <div class="form-group" style="padding-bottom: 15px;">
+                <label asp-for="Simplified" class="control-label"></label>
+                <input asp-for="Simplified" class="form-control" />
+            </div>
+            <div class="form-group" style="padding-bottom: 15px;">
+                <label asp-for="Traditional" class="control-label"></label>
+                <input asp-for="Traditional" class="form-control" />
+            </div>
+            <div class="form-group" style="padding-bottom: 15px;">
+                <label asp-for="Pinyin" class="control-label"></label>
+                <input asp-for="Pinyin" class="form-control" />
+            </div>
+            <div class="form-group" style="padding-bottom: 15px;">
+                <label asp-for="Translation" class="control-label"></label>
+                <input asp-for="Translation" class="form-control" />
+            </div>
+            <div class="form-group" style="padding-bottom: 15px;">
+                <label asp-for="Note" class="control-label"></label>
+                <textarea asp-for="Note" class="form-control" rows="4"></textarea>
+            </div>
+
+            <div class="form-group" style="padding-bottom: 15px;">
+                <input type="submit" value="Save updates" class="btn btn-primary buttons" />
+            </div>
+        </form>
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+        @if (TempData["FailureMessage"] != null)
+        {
+            <div class="alert alert-danger">
+                @TempData["FailureMessage"]
+            </div>
+        }
+    </div>
+</div>
+
+<div style="display: flex; justify-content: flex-end; padding-top: 69px; padding-bottom: 15px;">
+    <button style="transform: scale(0.9);" class="buttons" title="WARNING! This will delete this entry from your account, including all your decks.">
+        <a style="text-decoration: none; color: #333;" href="@Url.Action("DeleteCard", "Flashcard", new { id = Model.Id, source = currentUrl, deckId = ViewBag.DeckId, page = ViewBag.CurrentPage, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter, deckName = ViewBag.DeckName, bookName = ViewBag.TextbookName, lessonName = ViewBag.LessonUnit })">Delete this flashcard</a>
+    </button>
+</div>
+
+
+<script>
+
+    // -------------- character size changes based on nb of characters -----------
+
+    const primaryCharacterElement = document.getElementById("primaryCharacter");
+    const secondaryCharacterElement = document.getElementById("secondaryCharacter");
+
+    function setPrimaryCharacterFontSize(element, characterCount) {
+        if (characterCount == 1) {
+            element.style.fontSize = "18vw";
+        } else if (characterCount == 2) {
+            element.style.fontSize = "15vw";
+        } else if (characterCount == 3) {
+            element.style.fontSize = "10vw";
+        } else if (characterCount == 4) {
+            element.style.fontSize = "8vw";
+        } else {
+            element.style.fontSize = "4vw";
+        }
+    }
+
+    function setSecondaryCharacterFontSize(element, characterCount) {
+        if (characterCount == 1) {
+            element.style.fontSize = "7vw";
+        } else if (characterCount == 2) {
+            element.style.fontSize = "6vw";
+        } else if (characterCount == 3) {
+            element.style.fontSize = "5vw";
+        } else if (characterCount == 4) {
+            element.style.fontSize = "4vw";
+        } else {
+            element.style.fontSize = "2vw";
+        }
+    }
+
+    // Calculate and set font size based on character count
+    setPrimaryCharacterFontSize(primaryCharacterElement, primaryCharacterElement.textContent.length);
+    setSecondaryCharacterFontSize(secondaryCharacterElement, secondaryCharacterElement.textContent.length);
+
+</script>
+

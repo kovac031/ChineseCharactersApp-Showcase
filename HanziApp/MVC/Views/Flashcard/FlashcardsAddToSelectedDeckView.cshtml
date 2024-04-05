@@ -1,0 +1,428 @@
+﻿<!-- FlashcardsAddToSelectedDeckView -->
+
+<!--
+    Flashcard/ShowAllFlashcardsNotInDeckForSelectionView
+-->
+REDACTED FBI KGB CIA
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+@{
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+
+    // checks if all empty in column
+    bool simplifiedEmpty = Model.All(entity => string.IsNullOrEmpty(entity.Simplified));
+    bool traditionalEmpty = Model.All(entity => string.IsNullOrEmpty(entity.Traditional));
+    bool noteEmpty = Model.All(entity => string.IsNullOrEmpty(entity.Note));
+}
+
+<style>
+
+    .buttons {
+        background-color: #f2f2f2;
+        color: #333;
+        padding: 4px 8px;
+        font-size: 18px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+        .buttons:hover {
+            background-color: #dcdcdc;
+            color: #333; 
+        }
+
+    #flashcardsTable tbody tr.selected {
+        background-color: #daebda; 
+        border: 2px solid rgba(50, 50, 50, 0.2);
+    }
+
+    #flashcardsTable tbody tr:hover {
+        background-color: rgba(230, 230, 230, 0.35);
+    }
+
+    .main-div {
+        display: flex;
+        flex-direction: row;
+        padding-bottom: 15px;
+    }
+
+        .top-div-left {
+            width: 50%;
+        }
+
+        .top-div-right {
+            width: 50%;
+            text-align: right;
+        }
+
+    .main-sort-div {
+        display: flex;
+        flex-direction: row;
+    }
+
+        .sub-sort-div {
+            padding: 10px;
+            padding-right: 30px;
+        }
+
+</style>
+
+<div class="main-div">
+
+    <div class="top-div-left">
+        <a class="buttons" href="@Url.Action("ShowDeckEditView", "Deck", new { deckId = ViewBag.DeckId })">Back to deck details.</a>
+    </div>
+
+    <div class="top-div-right">
+        <form id="flashcardForm" method="post" action="@Url.Action("AddSelectedFlashcardsToSelectedDeck", "Flashcard", new { deckId = ViewBag.DeckId })">
+            <div>
+                <input type="hidden" name="flashcardIds" id="idArray" />
+                <button class="buttons" type="submit">Add selected rows to this deck</button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["FailureMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["FailureMessage"]
+    </div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Deck name:</th>
+            <th>Textbook title:</th>
+            <th>Lesson unit:</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                @if (!string.IsNullOrEmpty(ViewBag.DeckName))
+                {
+                    <h2>@ViewBag.DeckName</h2>
+                }
+            </td>
+            <td>
+                @if (!string.IsNullOrEmpty(ViewBag.BookName))
+                {
+                    <h3>@ViewBag.BookName</h3>
+                }
+            </td>
+            <td>
+                @if (!string.IsNullOrEmpty(ViewBag.UnitName))
+                {
+                    <h3>@ViewBag.UnitName</h3>
+                }
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="main-div">
+    <p>The table has all your flashcards which are currently not in this deck. Click on rows to select what you need, then save via the "Add selected rows to this deck" button.</p>
+</div>
+
+<!-- FILTER FORM -->
+<div class="table-filter-settings-main">
+    <div class="table-filter-settings-searchbar">
+        @using (Html.BeginForm("ShowAllFlashcardsNotInDeckForSelectionView", "Flashcard", FormMethod.Get))
+        {
+            <div class="table-filter-settings-main">
+                <input type="hidden" name="deckId" value="@ViewBag.DeckId" />
+                <input type="hidden" name="sortBy" value="@ViewBag.CurrentSort" />
+                <input type="hidden" name="page" value="@ViewBag.CurrentPage" />
+
+                <div class="row-element">
+                    <label for="filterBy">Search: </label>
+                    <input type="text" name="filterBy" value="@ViewBag.SearchFilter" />
+
+                    <input type="submit" value="Search" />
+
+                    @if (!string.IsNullOrEmpty(ViewBag.SearchFilter))
+                    {
+                        <a href="@Url.Action("ShowAllFlashcardsNotInDeckForSelectionView", "Flashcard")">Clear filter</a>
+                    }
+                </div>
+                
+            </div>
+        }
+    </div>
+</div>
+
+<!-- SORTING EXTRA OPTIONS -->
+
+<div class="main-sort-div">
+    <div class="sub-sort-div">
+        <a href="@Url.Action("ShowAllFlashcardsNotInDeckForSelectionView", "Flashcard", new { deckId = ViewBag.DeckId, page = ViewBag.CurrentPage, sortBy = ViewBag.SortByDifficulty, filterBy = ViewBag.SearchFilter })" class="buttons">
+            Sort by your difficulty rating
+            @if (ViewBag.CurrentSort == "score_asc")
+            {
+                <span>↓ easiest first</span>
+            }
+            else if (ViewBag.CurrentSort == "score_desc")
+            {
+                <span>↓ hardest first</span>
+            }
+        </a>
+    </div>
+    <div class="sub-sort-div">
+        <a href="@Url.Action("ShowAllFlashcardsNotInDeckForSelectionView", "Flashcard", new { deckId = ViewBag.DeckId, page = ViewBag.CurrentPage, sortBy = ViewBag.SortByTimeAdded, filterBy = ViewBag.SearchFilter })" class="buttons">
+            Sort by time created
+            @if (ViewBag.CurrentSort == "added_asc")
+            {
+                <span>↓ newest first</span>
+            }
+            else if (ViewBag.CurrentSort == "added_desc")
+            {
+                <span>↓ oldest first</span>
+            }
+        </a>
+    </div>
+    <div class="sub-sort-div">
+        <a href="@Url.Action("ShowAllFlashcardsNotInDeckForSelectionView", "Flashcard", new { deckId = ViewBag.DeckId, page = ViewBag.CurrentPage, sortBy = ViewBag.SortByTimeUpdated, filterBy = ViewBag.SearchFilter })" class="buttons">
+            Sort by time updated
+            @if (ViewBag.CurrentSort == "updated_asc")
+            {
+                <span>↓ newest first</span>
+            }
+            else if (ViewBag.CurrentSort == "updated_desc")
+            {
+                <span>↓ oldest first</span>
+            }
+        </a>
+    </div>
+</div>
+
+<!-- TABLE WITH HEADER SORTING -->
+
+<table class="table" id="flashcardsTable">
+    <thead>
+        <tr>
+            @if (!simplifiedEmpty)
+            {
+                <th>
+                    <a href="@Url.Action("ShowAllFlashcardsNotInDeckForSelectionView", "Flashcard", new { deckId = ViewBag.DeckId, page = ViewBag.CurrentPage, sortBy = ViewBag.SortByCharacters, filterBy = ViewBag.SearchFilter })" class="buttons">
+                        Simplified
+                        @if (string.IsNullOrEmpty(ViewBag.CurrentSort))
+                        {
+                            <span>↓ from first</span>
+                        }
+                        else if (ViewBag.CurrentSort == "char_desc")
+                        {
+                            <span>↓ from last</span>
+                        }
+                    </a>
+            </th>
+            }
+            @if (!traditionalEmpty)
+            {
+                <th>
+                    <a href="@Url.Action("ShowAllFlashcardsNotInDeckForSelectionView", "Flashcard", new { deckId = ViewBag.DeckId, page = ViewBag.CurrentPage, sortBy = ViewBag.SortByCharacters, filterBy = ViewBag.SearchFilter })" class="buttons">
+                        Traditional
+                        @if (string.IsNullOrEmpty(ViewBag.CurrentSort))
+                        {
+                            <span>↓ from first</span>
+                        }
+                        else if (ViewBag.CurrentSort == "char_desc")
+                        {
+                            <span>↓ from last</span>
+                        }
+                    </a>
+            </th>
+            }
+            <th>
+                <a href="@Url.Action("ShowAllFlashcardsNotInDeckForSelectionView", "Flashcard", new { deckId = ViewBag.DeckId, page = ViewBag.CurrentPage, sortBy = ViewBag.SortByPinyin, filterBy = ViewBag.SearchFilter })" class="buttons">
+                    Pinyin
+                    @if (ViewBag.CurrentSort == "pinyin_asc")
+                    {
+                        <span>↓ from "a"</span>
+                    }
+                    else if (ViewBag.CurrentSort == "pinyin_desc")
+                    {
+                        <span>↓ from "z"</span>
+                    }
+                </a>
+            </th>
+            <th>
+                <a href="@Url.Action("ShowAllFlashcardsNotInDeckForSelectionView", "Flashcard", new { deckId = ViewBag.DeckId, page = ViewBag.CurrentPage, sortBy = ViewBag.SortByTranslation, filterBy = ViewBag.SearchFilter })" class="buttons">
+                    Translation
+                    @if (ViewBag.CurrentSort == "transl_asc")
+                    {
+                        <span>↓ from "a"</span>
+                    }
+                    else if (ViewBag.CurrentSort == "transl_desc")
+                    {
+                        <span>↓ from "z"</span>
+                    }
+                </a>
+            </th>
+            @if (!noteEmpty)
+            {
+                <th>@Html.DisplayNameFor(model => model.Note)</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr data-flashcard-id="@item.Id">
+                @if (!simplifiedEmpty)
+                {
+                    <td style="font-family: 'KaiTi', 'Noto Serif SC'; font-size: 28px;">
+                        @{
+                            string simplified = item.Simplified;
+                            if (!string.IsNullOrEmpty(simplified) && simplified.Length > 8)
+                            {
+                                simplified = simplified.Substring(0, 8) + "(...)";
+                            }
+                        }
+                        <span title="@item.Simplified">@Html.DisplayFor(modelItem => simplified)</span>
+                    </td>
+                }
+                @if (!traditionalEmpty)
+                {
+                    <td style="font-family: 'KaiTi', 'Noto Serif SC'; font-size: 28px;">
+                        @{
+                            string traditional = item.Traditional;
+                            if (!string.IsNullOrEmpty(traditional) && traditional.Length > 8)
+                            {
+                                traditional = traditional.Substring(0, 8) + "(...)";
+                            }
+                        }
+                        <span title="@item.Traditional">@Html.DisplayFor(modelItem => traditional)</span>
+                    </td>
+                }
+                <td style="font-size: 18px;">
+                    @{
+                        string pinyin = item.Pinyin;
+                        if (!string.IsNullOrEmpty(pinyin) && pinyin.Length > 80)
+                        {
+                            pinyin = pinyin.Substring(0, 80) + "(...)";
+                        }
+                    }
+                    <span title="@item.Pinyin">@Html.DisplayFor(modelItem => pinyin)</span>
+                </td>
+                <td style="font-size: 18px;">
+                    @{
+                        string translation = item.Translation;
+                        if (!string.IsNullOrEmpty(translation) && translation.Length > 80)
+                        {
+                            translation = translation.Substring(0, 80) + "(...)";
+                        }
+                    }
+                    <span title="@item.Translation">@Html.DisplayFor(modelItem => translation)</span>
+                </td>
+                @if (!noteEmpty)
+                {
+                    <td style="font-size: 18px;">
+                        @{
+                            string note = item.Note;
+                            if (!string.IsNullOrEmpty(note) && note.Length > 30)
+                            {
+                                note = note.Substring(0, 30) + "(...)";
+                            }
+                        }
+                        <span title="@item.Note">@Html.DisplayFor(modelItem => note)</span>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p>Found <strong>@ViewBag.TotalFound</strong> flashcards not in this deck.</p>
+
+<!-- Previous and Next buttons with padding between them -->
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        <li class="page-item @(currentPage == 1 ? "disabled" : "")" style="margin-right: 20px;">
+            <a class="page-link" href="@Url.Action("ShowAllFlashcardsNotInDeckForSelectionView", "Flashcard", new { page = currentPage - 1, deckId = ViewBag.DeckId, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter })">Previous</a>
+        </li>
+        <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+            <a class="page-link" href="@Url.Action("ShowAllFlashcardsNotInDeckForSelectionView", "Flashcard", new { page = currentPage + 1, deckId = ViewBag.DeckId, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter })">Next</a>
+        </li>
+    </ul>
+</nav>
+
+
+<!-- Page buttons with first and last -->
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        <!-- First page button -->
+        <li class="page-item @(currentPage == 1 ? "disabled" : "")" style="margin-right: 10px;">
+            <a class="page-link" href="@Url.Action("ShowAllFlashcardsNotInDeckForSelectionView", "Flashcard", new { page = 1, deckId = ViewBag.DeckId, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter })">Go to page 1</a>
+        </li>
+
+        @for (var i = Math.Max(1, currentPage - 4); i <= Math.Min(totalPages, currentPage + 4); i++)
+        {
+            <li class="page-item @(i == currentPage ? "active" : "")">
+                <a class="page-link" href="@Url.Action("ShowAllFlashcardsNotInDeckForSelectionView", "Flashcard", new { page = i, deckId = ViewBag.DeckId, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter })">@i</a>
+            </li>
+        }
+
+        <!-- Last page button -->
+        <li class="page-item @(currentPage == totalPages ? "disabled" : "")" style="margin-left: 10px;">
+            <a class="page-link" href="@Url.Action("ShowAllFlashcardsNotInDeckForSelectionView", "Flashcard", new { page = totalPages, deckId = ViewBag.DeckId, sortBy = ViewBag.CurrentSort, filterBy = ViewBag.SearchFilter })">Go to page @totalPages (last)</a>
+        </li>
+
+        <!-- Textbox and Go button for specific page -->
+        <li class="page-item" style="margin-left: 10px;">
+            <input type="text" id="gotoPage" style="width: 50px;" />
+        </li>
+        <li class="page-item" style="margin-left: 10px;">
+            <button id="goButton" class="page-link">Go</button>
+        </li>
+    </ul>
+</nav>
+
+
+@section Scripts
+    {
+    <script>
+        var selectedFlashcards = new Set(); // supposedly JavaScript can't handle Guid, so it must be collected as strings
+
+        $(document).on('click', 'table tbody tr', function () {
+            console.log('Row clicked');
+
+            $(this).toggleClass('selected');
+
+            var flashcardId = $(this).data('flashcard-id');
+            //console.log('Flashcard ID:', flashcardId);
+
+            if ($(this).hasClass('selected')) {
+                selectedFlashcards.add(flashcardId);
+                console.log('Flashcard added to selection');
+            } else {
+                selectedFlashcards.delete(flashcardId);
+                console.log('Flashcard removed from selection');
+            }
+
+            // debugging, Display all current selectedFlashcards
+            //console.log('Current selectedFlashcards:', Array.from(selectedFlashcards));
+
+        });
+
+        // updates and inserts collected Id values into the form before submission to controller method
+        $('#flashcardForm').submit(function () {
+            $('#idArray').val(Array.from(selectedFlashcards).join(', '));
+        });
+
+    </script>
+}

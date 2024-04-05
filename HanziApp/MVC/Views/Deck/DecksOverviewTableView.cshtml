@@ -1,0 +1,260 @@
+﻿<!-- DecksOverviewTableView -->
+REDACTED FBI KGB CIA
+
+@{
+    int noDeckEntries = 0;
+    int totalCount = 0;
+    Guid noDeckId = Guid.Empty;
+
+    bool deckNameEmpty = Model.All(entity => string.IsNullOrEmpty(entity.DeckName));
+    bool bookNameEmpty = Model.All(entity => string.IsNullOrEmpty(entity.BookName));
+    bool unitNameEmpty = Model.All(entity => string.IsNullOrEmpty(entity.UnitName));
+    bool descriptionEmpty = Model.All(entity => string.IsNullOrEmpty(entity.Deckscription));
+}
+
+<style>
+
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border: 1px solid #ddd;
+        font-size: 20px;
+    }
+
+    th {
+        background-color: #f2f2f2;
+        border: none;
+    }
+
+    tbody tr:hover {
+        background-color: rgba(230, 230, 230, 0.35);
+    }
+
+    .hover-cell {
+        border: none;
+        display: none;
+        position: absolute;
+        margin-top: -8px;
+        cursor: pointer;
+        z-index: 1; /* Ensure it appears over other cells */
+    }
+
+    .buttons {
+        background-color: #f2f2f2;
+        color: #333;
+        padding: 8px;
+        font-size: 18px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background-color 0.3s;
+        margin: 0 auto; 
+        vertical-align: middle;
+    }
+
+        .buttons:hover {
+            background-color: #dcdcdc;
+            color: #333; /* New background color on hover */
+        }
+
+</style>
+
+<div style="padding-bottom: 30px;">
+    <a class="buttons" href="@Url.Action("ShowProfilePage", "ProfilePage")">Back to profile page</a>
+</div>
+
+
+<table id="myTable" class="table">
+    <!-- tablica -->
+    @if (Model.Count <= 1 && noDeckEntries == totalCount) // only one or no deck, and all entries are in it -> must be the "null" deck
+    {
+        <h3>You currently have no decks.</h3>
+    }
+    else
+    {
+        <thead>
+            <tr>
+                @if (!deckNameEmpty)
+                {
+                    <th>
+                        <a href="@Url.Action("DecksOverviewTable", "Deck", new { sortBy = ViewBag.SortByDeck })" class="table-header"
+                       style="background-color: #f2f2f2; color: #333; padding: 4px 8px; font-size: 18px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; text-decoration: none;"
+                       onmouseover="this.style.backgroundColor='#dcdcdc'" onmouseout="this.style.backgroundColor='#f2f2f2'">
+                        Deck name
+                    </a>
+                </th>
+                }
+                @if (!bookNameEmpty)
+                {
+                    <th>
+                        <a href="@Url.Action("DecksOverviewTable", "Deck", new { sortBy = ViewBag.SortByTextbook })" class="table-header"
+                       style="background-color: #f2f2f2; color: #333; padding: 4px 8px; font-size: 18px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; text-decoration: none;"
+                       onmouseover="this.style.backgroundColor='#dcdcdc'" onmouseout="this.style.backgroundColor='#f2f2f2'">
+                        Textbook name
+                    </a>
+                </th>
+                }
+                @if (!unitNameEmpty)
+                {
+                    <th>
+                        <a href="@Url.Action("DecksOverviewTable", "Deck", new { sortBy = ViewBag.SortByLesson })" class="table-header"
+                       style="background-color: #f2f2f2; color: #333; padding: 4px 8px; font-size: 18px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; text-decoration: none;"
+                       onmouseover="this.style.backgroundColor='#dcdcdc'" onmouseout="this.style.backgroundColor='#f2f2f2'">
+                        Lesson unit
+                    </a>
+                </th>
+                }
+                @if (!descriptionEmpty)
+                {
+                    <th>
+                        Description
+                </th>
+                }
+                <th>
+                    <a href="@Url.Action("DecksOverviewTable", "Deck", new { sortBy = ViewBag.SortByCount })" class="table-header"
+                       style="background-color: #f2f2f2; color: #333; padding: 4px 8px; font-size: 18px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; text-decoration: none;"
+                       onmouseover="this.style.backgroundColor='#dcdcdc'" onmouseout="this.style.backgroundColor='#f2f2f2'">
+                        Entries count
+                    </a>
+                </th>
+                <th>Created on</th>
+                <th>Last updated</th>
+            </tr>
+        </thead>
+    }
+    <tbody>
+        @foreach (var item in Model)
+        {
+            if(
+                item.DeckName == null && item.BookName == null && item.UnitName == null
+            )
+            {
+                if (noDeckId == Guid.Empty) { noDeckId = item.Id; }
+                noDeckEntries = item.EntriesCount;
+                totalCount += item.EntriesCount; // add null deck count to total count
+                continue; 
+            }
+            totalCount += item.EntriesCount; // add the other deck counts to total count
+            <tr>
+                @if (!deckNameEmpty)
+                {
+                    <td>
+                        @{
+                            string truncate = item.DeckName;
+                            if (!string.IsNullOrEmpty(truncate) && truncate.Length > 25)
+                            {
+                                truncate = truncate.Substring(0, 25) + "(...)";
+                            }
+                        }
+                        <span title="@item.DeckName">@Html.DisplayFor(modelItem => truncate)</span>
+                    </td>
+                }
+                @if (!bookNameEmpty)
+                {
+                    <td>
+                        @{
+                            string truncate = item.BookName;
+                            if (!string.IsNullOrEmpty(truncate) && truncate.Length > 25)
+                            {
+                                truncate = truncate.Substring(0, 25) + "(...)";
+                            }
+                        }
+                        <span title="@item.BookName">@Html.DisplayFor(modelItem => truncate)</span>
+                    </td>
+                }
+                @if (!unitNameEmpty)
+                {
+                    <td>
+                        @{
+                            string truncate = item.UnitName;
+                            if (!string.IsNullOrEmpty(truncate) && truncate.Length > 25)
+                            {
+                                truncate = truncate.Substring(0, 25) + "(...)";
+                            }
+                        }
+                        <span title="@item.UnitName">@Html.DisplayFor(modelItem => truncate)</span>
+                    </td>
+                }
+                @if (!descriptionEmpty)
+                {
+                    <td>
+                        @{
+                            string truncate = item.Deckscription;
+                            if (!string.IsNullOrEmpty(truncate) && truncate.Length > 25)
+                            {
+                                truncate = truncate.Substring(0, 25) + "(...)";
+                            }
+                        }
+                        <span title="@item.Deckscription">@Html.DisplayFor(modelItem => truncate)</span>
+                    </td>
+                }
+                <td>@Html.DisplayFor(modelItem => item.EntriesCount)</td>
+                <td>@(item.TimeAdded.ToString("dd/MM/yyyy"))</td>
+                <td>
+                    @{
+                        if (item.TimeUpdated.ToString("dd/MM/yyyy") != "01/01/0001")
+                        {
+                            @(item.TimeUpdated.ToString("dd/MM/yyyy"))   
+                        }
+                    }
+                </td>
+                <td class="hover-cell">
+                    <button class="buttons" style="cursor: pointer;" title="This will only delete the deck itself and NOT your flashcards. Your vocabulary collection will not be affected.">
+                        <a style="text-decoration: none; color: #333;" href="@Url.Action("DeleteDeck", "Deck", new { deckId = item.Id })">Delete deck</a>
+                    </button>
+                
+                    <button class="buttons">
+                        <a style="text-decoration: none; color: #333;" href="@Url.Action("ShowDeckEditView", "Deck", new { deckId = item.Id })">View details</a>
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if(noDeckEntries > 0)
+{
+    <div>
+        You have <strong>@noDeckEntries</strong> flashcards that are not in any deck.
+
+        <a href="@Url.Action("ShowDeckEditView", "Deck", new { deckId = noDeckId })">Browse those.</a>
+    </div>
+}
+
+<div>
+    In total, you have <strong>@ViewBag.TotalCount</strong> unique flashcards tied to your account.
+</div>
+@if(totalCount > ViewBag.TotalCount)
+{
+    <div>
+        If also including same flashcards present in multiple decks, your total sum becomes <strong>@totalCount</strong>.
+    </div>
+}
+
+<div style="padding-top: 15px;">
+    <a href="@Url.Action("ShowCreateView", "Deck")"
+       style="background-color: #f2f2f2; color: #333; padding: 4px 8px; font-size: 18px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; text-decoration: none;"
+       onmouseover="this.style.backgroundColor='#dcdcdc'" onmouseout="this.style.backgroundColor='#f2f2f2'">
+        <strong>Create a new empty deck</strong>
+    </a>
+</div>
+
+
+@section Scripts
+    {
+    <script>      
+        
+        // show delete / details buttons on row hover
+        $(document).ready(function () {
+            $('#myTable tbody tr').hover(
+                function () {
+                    $(this).find('.hover-cell').show();
+                },
+                function () {
+                    $(this).find('.hover-cell').hide();
+                }
+            );
+        });
+    </script>
+}

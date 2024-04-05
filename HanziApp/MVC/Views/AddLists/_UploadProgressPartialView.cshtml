@@ -1,0 +1,42 @@
+﻿<!-- _UploadProgressPartialView -->
+
+<style>
+    .progress-bar-container {
+        display: flex;
+        justify-content: center; /* Center the content horizontally */
+        align-items: center; /* Center the content vertically */
+        width: 100%;
+        height: 40px;
+        background-color: #ddd;
+        position: relative; /* Set position relative to allow absolute positioning of children */
+    }
+
+    .progress-bar-fill {
+        position: absolute; /* Position the progress bar absolutely */
+        top: 0;
+        left: 0;
+        bottom: 0;
+        background-color: #6DBD63;
+        width: @ViewBag.Percentage%;
+    }
+
+    .message-container {
+        position: absolute; /* Position the message container absolutely */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center; /* Center the content horizontally */
+        align-items: center; /* Center the content vertically */
+    }
+</style>
+
+<div class="progress-bar-container">
+    <div class="progress-bar-fill"></div>
+    <div class="message-container">
+        @ViewBag.Message
+    </div>
+</div>
+
+
