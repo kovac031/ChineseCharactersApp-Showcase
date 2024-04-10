@@ -608,7 +608,7 @@ public static class StaticUtilityMethods
   <img src="https://github.com/kovac031/ChineseCharactersApp-Showcase/blob/main/heatmap.gif">
 </p>
 
-## Clicking to select rows to add to list <a name="addList"></a>
+## Clicking to select rows to add to list <a name="addLists"></a>
 Using JavaScript/jQuery
 
 <p align="center">
